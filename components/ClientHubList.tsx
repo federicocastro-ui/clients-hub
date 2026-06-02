@@ -50,12 +50,20 @@ const AGENT_GRID =
 
 export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
   const [collapsedStatus, setCollapsedStatus] = useState<Set<ClientStatus>>(new Set())
+  const [collapsedClient, setCollapsedClient] = useState<Set<string>>(new Set())
   const [collapsedSub, setCollapsedSub] = useState<Set<string>>(new Set())
 
   const toggleStatus = (s: ClientStatus) =>
     setCollapsedStatus((prev) => {
       const next = new Set(prev)
       next.has(s) ? next.delete(s) : next.add(s)
+      return next
+    })
+
+  const toggleClient = (id: string) =>
+    setCollapsedClient((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
 
@@ -101,6 +109,8 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
                   <ClientCard
                     key={client.id}
                     client={client}
+                    open={!collapsedClient.has(client.id)}
+                    onToggle={() => toggleClient(client.id)}
                     collapsedSub={collapsedSub}
                     toggleSub={toggleSub}
                   />
@@ -116,60 +126,76 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
 
 function ClientCard({
   client,
+  open,
+  onToggle,
   collapsedSub,
   toggleSub,
 }: {
   client: ClientGroup
+  open: boolean
+  onToggle: () => void
   collapsedSub: Set<string>
   toggleSub: (id: string) => void
 }) {
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
-      {/* Nivel 2: cliente (resumen de alto nivel). El status no se repite acá:
-          ya está en el encabezado de la sección que agrupa a los clientes. */}
-      <div className="border-b border-zinc-800 px-3 py-2.5">
-        <span className="text-sm font-semibold text-zinc-100">{client.name}</span>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
-          <span>
-            {client.subAccountCount} sub {client.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
-          </span>
-          <span className="text-zinc-600">·</span>
-          <span>{client.agentCount} agentes</span>
-          {client.tiposDeMora.length > 0 && (
-            <>
-              <span className="text-zinc-600">·</span>
-              <span>{client.tiposDeMora.join(', ')}</span>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* Encabezado de columnas de sub cuentas */}
-      <div
-        className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
+      {/* Nivel 2: cliente (resumen de alto nivel), colapsable. El status no se
+          repite acá: ya está en el encabezado de la sección que los agrupa. */}
+      <button
+        onClick={onToggle}
+        className={`flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-zinc-800/30 ${open ? 'border-b border-zinc-800' : ''}`}
       >
-        <span />
-        <span>Sub cuenta</span>
-        <span>Tier</span>
-        <span>Agentes</span>
-        <span>Onb</span>
-        <span>CS</span>
-        <span>IE</span>
-        <span>Status</span>
-      </div>
+        <span className="mt-0.5">
+          <Chevron open={open} />
+        </span>
+        <span className="min-w-0">
+          <span className="text-sm font-semibold text-zinc-100">{client.name}</span>
+          <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
+            <span>
+              {client.subAccountCount} sub {client.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
+            </span>
+            <span className="text-zinc-600">·</span>
+            <span>{client.agentCount} agentes</span>
+            {client.tiposDeMora.length > 0 && (
+              <>
+                <span className="text-zinc-600">·</span>
+                <span>{client.tiposDeMora.join(', ')}</span>
+              </>
+            )}
+          </span>
+        </span>
+      </button>
 
-      {/* Nivel 3: sub cuentas — cada una en su bloque, con tonos alternados */}
-      <div className="flex flex-col gap-1.5 p-1.5">
-        {client.subAccounts.map((sub, i) => (
-          <SubAccountBlock
-            key={sub.id}
-            sub={sub}
-            index={i}
-            open={!collapsedSub.has(sub.id)}
-            onToggle={() => toggleSub(sub.id)}
-          />
-        ))}
-      </div>
+      {open && (
+        <>
+          {/* Encabezado de columnas de sub cuentas */}
+          <div
+            className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
+          >
+            <span />
+            <span>Sub cuenta</span>
+            <span>Tier</span>
+            <span>Agentes</span>
+            <span>Onb</span>
+            <span>CS</span>
+            <span>IE</span>
+            <span>Status</span>
+          </div>
+
+          {/* Nivel 3: sub cuentas — cada una en su bloque, con tonos alternados */}
+          <div className="flex flex-col gap-1.5 p-1.5">
+            {client.subAccounts.map((sub, i) => (
+              <SubAccountBlock
+                key={sub.id}
+                sub={sub}
+                index={i}
+                open={!collapsedSub.has(sub.id)}
+                onToggle={() => toggleSub(sub.id)}
+              />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }
