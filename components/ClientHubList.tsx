@@ -125,15 +125,10 @@ function ClientCard({
 }) {
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
-      {/* Nivel 2: cliente (resumen de alto nivel) */}
+      {/* Nivel 2: cliente (resumen de alto nivel). El status no se repite acá:
+          ya está en el encabezado de la sección que agrupa a los clientes. */}
       <div className="border-b border-zinc-800 px-3 py-2.5">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-sm font-semibold text-zinc-100">{client.name}</span>
-          <Badge
-            label={CLIENT_STATUS_LABELS[client.status]}
-            className={CLIENT_STATUS_BADGE[client.status]}
-          />
-        </div>
+        <span className="text-sm font-semibold text-zinc-100">{client.name}</span>
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
           <span>
             {client.subAccountCount} sub {client.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
