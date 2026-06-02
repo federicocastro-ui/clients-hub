@@ -40,11 +40,13 @@ function people(set: PersonRef[]): string {
 
 // Columnas de la fila de sub cuenta. Definidas como template para poder
 // sumar columnas nuevas después sin romper el layout.
+// chevron · Sub cuenta · Tier · Agentes · Onb · CS · IE · Status
 const SUB_GRID =
-  'grid grid-cols-[1.25rem_minmax(8rem,1.4fr)_3.5rem_4rem_minmax(6rem,1fr)_minmax(6rem,1fr)_7.5rem] items-center gap-2'
+  'grid grid-cols-[1.25rem_minmax(7rem,1.3fr)_3rem_4rem_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_7rem] items-center gap-2'
 
+// Agente · Etapa · País · Mora
 const AGENT_GRID =
-  'grid grid-cols-[minmax(10rem,1.8fr)_10rem_7rem_4rem_minmax(9rem,1.4fr)] items-center gap-2'
+  'grid grid-cols-[minmax(12rem,2fr)_11rem_minmax(6rem,1fr)_5rem] items-center gap-2'
 
 export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
   const [collapsedStatus, setCollapsedStatus] = useState<Set<ClientStatus>>(new Set())
@@ -123,7 +125,7 @@ function ClientCard({
 }) {
   return (
     <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
-      {/* Nivel 2: cliente */}
+      {/* Nivel 2: cliente (resumen de alto nivel) */}
       <div className="border-b border-zinc-800 px-3 py-2.5">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-sm font-semibold text-zinc-100">{client.name}</span>
@@ -132,25 +134,12 @@ function ClientCard({
             className={CLIENT_STATUS_BADGE[client.status]}
           />
         </div>
-        {/* Resumen derivado del cliente */}
         <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
           <span>
             {client.subAccountCount} sub {client.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
           </span>
           <span className="text-zinc-600">·</span>
           <span>{client.agentCount} agentes</span>
-          {client.tiers.length > 0 && (
-            <>
-              <span className="text-zinc-600">·</span>
-              <span>Tiers {client.tiers.join(', ')}</span>
-            </>
-          )}
-          {client.countries.length > 0 && (
-            <>
-              <span className="text-zinc-600">·</span>
-              <span>{client.countries.join(', ')}</span>
-            </>
-          )}
           {client.tiposDeMora.length > 0 && (
             <>
               <span className="text-zinc-600">·</span>
@@ -158,38 +147,29 @@ function ClientCard({
             </>
           )}
         </div>
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
-          <span className="text-zinc-500">
-            Onb: <span className="text-zinc-300">{people(client.onbSet)}</span>
-          </span>
-          <span className="text-zinc-500">
-            CS: <span className="text-zinc-300">{people(client.csSet)}</span>
-          </span>
-          <span className="text-zinc-500">
-            IE: <span className="text-zinc-300">{people(client.ieSet)}</span>
-          </span>
-        </div>
       </div>
 
       {/* Encabezado de columnas de sub cuentas */}
       <div
-        className={`${SUB_GRID} border-b border-zinc-800/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
+        className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
       >
         <span />
         <span>Sub cuenta</span>
         <span>Tier</span>
         <span>Agentes</span>
+        <span>Onb</span>
         <span>CS</span>
         <span>IE</span>
         <span>Status</span>
       </div>
 
-      {/* Nivel 3: sub cuentas */}
-      <div className="divide-y divide-zinc-800/60">
-        {client.subAccounts.map((sub) => (
+      {/* Nivel 3: sub cuentas — cada una en su bloque, con tonos alternados */}
+      <div className="flex flex-col gap-1.5 p-1.5">
+        {client.subAccounts.map((sub, i) => (
           <SubAccountBlock
             key={sub.id}
             sub={sub}
+            index={i}
             open={!collapsedSub.has(sub.id)}
             onToggle={() => toggleSub(sub.id)}
           />
@@ -201,23 +181,33 @@ function ClientCard({
 
 function SubAccountBlock({
   sub,
+  index,
   open,
   onToggle,
 }: {
   sub: SubAccountRow
+  index: number
   open: boolean
   onToggle: () => void
 }) {
+  // Tonos alternados para distinguir visualmente una sub cuenta de otra.
+  const even = index % 2 === 0
+  const headerBg = even ? 'bg-zinc-800/30' : 'bg-zinc-900/70'
+  const agentsBg = even ? 'bg-zinc-950/50' : 'bg-black/50'
+
   return (
-    <div>
+    <div className="overflow-hidden rounded-md border border-zinc-800">
       <button
         onClick={onToggle}
-        className={`${SUB_GRID} w-full px-3 py-2 text-left text-sm hover:bg-zinc-800/30`}
+        className={`${SUB_GRID} w-full px-3 py-2 text-left text-sm ${headerBg} hover:bg-zinc-700/30`}
       >
         <Chevron open={open} />
-        <span className="font-medium text-zinc-200">{sub.name}</span>
+        <span className="font-medium text-zinc-100">{sub.name}</span>
         <span className="text-zinc-400">T{sub.tier}</span>
         <span className="text-zinc-400">{sub.agentCount}</span>
+        <span className="truncate text-zinc-300" title={people(sub.onbSet)}>
+          {people(sub.onbSet)}
+        </span>
         <span className="truncate text-zinc-300" title={people(sub.csSet)}>
           {people(sub.csSet)}
         </span>
@@ -230,9 +220,9 @@ function SubAccountBlock({
         />
       </button>
 
-      {/* Nivel 4: agentes */}
+      {/* Nivel 4: agentes — recesado y nesteado bajo su sub cuenta */}
       {open && (
-        <div className="bg-zinc-950/40 pb-1">
+        <div className={`border-t border-zinc-800 ${agentsBg}`}>
           {sub.agents.length === 0 ? (
             <p className="px-3 py-2 pl-9 text-xs text-zinc-500">Sin agentes.</p>
           ) : (
@@ -244,7 +234,6 @@ function SubAccountBlock({
                 <span>Etapa</span>
                 <span>País</span>
                 <span>Mora</span>
-                <span>Onb · CS · IE</span>
               </div>
               {sub.agents.map((agent) => (
                 <AgentRowView key={agent.id} agent={agent} />
@@ -259,7 +248,7 @@ function SubAccountBlock({
 
 function AgentRowView({ agent }: { agent: AgentRow }) {
   return (
-    <div className={`${AGENT_GRID} px-3 py-1.5 pl-9 text-sm hover:bg-zinc-800/20`}>
+    <div className={`${AGENT_GRID} px-3 py-1.5 pl-9 text-sm hover:bg-zinc-800/30`}>
       <span className="truncate font-medium text-zinc-200" title={agent.derivedName}>
         {agent.derivedName}
       </span>
@@ -271,9 +260,6 @@ function AgentRowView({ agent }: { agent: AgentRow }) {
       </span>
       <span className="text-zinc-400">{agent.countryName}</span>
       <span className="text-zinc-400">{agent.tipoDeMora}</span>
-      <span className="truncate text-xs text-zinc-400">
-        {agent.onb?.name ?? '—'} · {agent.cs?.name ?? '—'} · {agent.ie?.name ?? '—'}
-      </span>
     </div>
   )
 }

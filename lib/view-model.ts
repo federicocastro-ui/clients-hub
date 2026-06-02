@@ -30,8 +30,9 @@ export interface SubAccountRow {
   tier: number
   status: SubAccountStatus
   agents: AgentRow[]
-  // Derivados
+  // Derivados de los agentes de la sub cuenta
   agentCount: number
+  onbSet: PersonRef[]
   csSet: PersonRef[]
   ieSet: PersonRef[]
 }
@@ -42,15 +43,10 @@ export interface ClientGroup {
   status: ClientStatus
   createdAt: string
   subAccounts: SubAccountRow[]
-  // Derivados
+  // Derivados (resumen de alto nivel del cliente)
   subAccountCount: number
   agentCount: number
-  tiers: number[]
-  countries: string[]
   tiposDeMora: TipoDeMora[]
-  onbSet: PersonRef[]
-  csSet: PersonRef[]
-  ieSet: PersonRef[]
 }
 
 export interface StatusGroup {

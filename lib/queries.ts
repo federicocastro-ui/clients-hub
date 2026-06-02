@@ -137,6 +137,7 @@ function buildSubAccountRow(raw: RawSubAccount, clientName: string): SubAccountR
     status: raw.status,
     agents,
     agentCount: agents.length,
+    onbSet: uniquePeople(agents.map((a) => a.onb)),
     csSet: uniquePeople(agents.map((a) => a.cs)),
     ieSet: uniquePeople(agents.map((a) => a.ie)),
   }
@@ -146,8 +147,6 @@ function buildClientGroup(raw: RawClient): ClientGroup {
   const subAccounts = raw.sub_accounts.map((s) => buildSubAccountRow(s, raw.name))
   const allAgents = subAccounts.flatMap((s) => s.agents)
 
-  const tiers = [...new Set(subAccounts.map((s) => s.tier))].sort((a, b) => a - b)
-  const countries = [...new Set(allAgents.map((a) => a.countryName))].sort()
   const moraSet = new Set(allAgents.map((a) => a.tipoDeMora))
   const tiposDeMora = MORA_ORDER.filter((m) => moraSet.has(m))
 
@@ -159,12 +158,7 @@ function buildClientGroup(raw: RawClient): ClientGroup {
     subAccounts,
     subAccountCount: subAccounts.length,
     agentCount: allAgents.length,
-    tiers,
-    countries,
     tiposDeMora,
-    onbSet: uniquePeople(allAgents.map((a) => a.onb)),
-    csSet: uniquePeople(allAgents.map((a) => a.cs)),
-    ieSet: uniquePeople(allAgents.map((a) => a.ie)),
   }
 }
 
