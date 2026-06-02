@@ -49,9 +49,11 @@ const AGENT_GRID =
   'grid grid-cols-[minmax(12rem,2fr)_11rem_minmax(6rem,1fr)_5rem] items-center gap-2'
 
 export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
+  // Default: todo colapsado salvo las secciones de status (así se ve la
+  // lista de clientes). Trackeamos lo EXPANDIDO; vacío = colapsado.
   const [collapsedStatus, setCollapsedStatus] = useState<Set<ClientStatus>>(new Set())
-  const [collapsedClient, setCollapsedClient] = useState<Set<string>>(new Set())
-  const [collapsedSub, setCollapsedSub] = useState<Set<string>>(new Set())
+  const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
+  const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set())
 
   const toggleStatus = (s: ClientStatus) =>
     setCollapsedStatus((prev) => {
@@ -60,15 +62,26 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
       return next
     })
 
-  const toggleClient = (id: string) =>
-    setCollapsedClient((prev) => {
+  const toggleClient = (client: ClientGroup) => {
+    const isOpen = expandedClients.has(client.id)
+    setExpandedClients((prev) => {
       const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
+      isOpen ? next.delete(client.id) : next.add(client.id)
       return next
     })
+    // Al colapsar un cliente, reseteamos sus sub cuentas a colapsadas: al
+    // re-abrir el cliente, las sub cuentas vuelven a estar comprimidas.
+    if (isOpen) {
+      setExpandedSubs((prev) => {
+        const next = new Set(prev)
+        client.subAccounts.forEach((s) => next.delete(s.id))
+        return next
+      })
+    }
+  }
 
   const toggleSub = (id: string) =>
-    setCollapsedSub((prev) => {
+    setExpandedSubs((prev) => {
       const next = new Set(prev)
       next.has(id) ? next.delete(id) : next.add(id)
       return next
@@ -109,9 +122,9 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
                   <ClientCard
                     key={client.id}
                     client={client}
-                    open={!collapsedClient.has(client.id)}
-                    onToggle={() => toggleClient(client.id)}
-                    collapsedSub={collapsedSub}
+                    open={expandedClients.has(client.id)}
+                    onToggle={() => toggleClient(client)}
+                    expandedSubs={expandedSubs}
                     toggleSub={toggleSub}
                   />
                 ))}
@@ -128,13 +141,13 @@ function ClientCard({
   client,
   open,
   onToggle,
-  collapsedSub,
+  expandedSubs,
   toggleSub,
 }: {
   client: ClientGroup
   open: boolean
   onToggle: () => void
-  collapsedSub: Set<string>
+  expandedSubs: Set<string>
   toggleSub: (id: string) => void
 }) {
   return (
@@ -189,7 +202,7 @@ function ClientCard({
                 key={sub.id}
                 sub={sub}
                 index={i}
-                open={!collapsedSub.has(sub.id)}
+                open={expandedSubs.has(sub.id)}
                 onToggle={() => toggleSub(sub.id)}
               />
             ))}
