@@ -13,9 +13,9 @@ INSERT INTO team_members (id, name, email) VALUES
   ('10000000-0000-0000-0000-000000000003', 'Lucía Mendez',      'lucia@kleva.co'),
   ('10000000-0000-0000-0000-000000000004', 'Diego Fernández',   'diego@kleva.co');
 
--- Cliente
-INSERT INTO clients (id, name, status) VALUES
-  ('20000000-0000-0000-0000-000000000001', 'ilumia', 'live');
+-- Cliente (sin status: el status vive a nivel sub cuenta)
+INSERT INTO clients (id, name) VALUES
+  ('20000000-0000-0000-0000-000000000001', 'ilumia');
 
 -- Sub cuenta
 INSERT INTO sub_accounts (id, client_id, name, tier, status) VALUES
@@ -26,7 +26,7 @@ INSERT INTO sub_accounts (id, client_id, name, tier, status) VALUES
 -- Agentes (el trigger insertará el log inicial automáticamente)
 INSERT INTO agents (
   id, sub_account_id, tipo_de_mora, country_id, current_stage,
-  onb_id, cs_id, ie_id,
+  onb_id, cs_id, ie_id, is_live, is_active,
   linear_url, notion_url
 ) VALUES
   (
@@ -38,6 +38,8 @@ INSERT INTO agents (
     '10000000-0000-0000-0000-000000000001',  -- Valentina (Onb)
     '10000000-0000-0000-0000-000000000002',  -- Martín (CS)
     '10000000-0000-0000-0000-000000000003',  -- Lucía (IE)
+    true,  -- is_live
+    true,  -- is_active
     'https://linear.app/kleva/issue/DEMO-1',
     'https://notion.so/kleva/demo-b0'
   ),
@@ -50,6 +52,8 @@ INSERT INTO agents (
     '10000000-0000-0000-0000-000000000001',  -- Valentina (Onb)
     '10000000-0000-0000-0000-000000000002',  -- Martín (CS)
     '10000000-0000-0000-0000-000000000004',  -- Diego (IE)
+    false,  -- is_live
+    true,   -- is_active
     'https://linear.app/kleva/issue/DEMO-2',
     'https://notion.so/kleva/demo-b1'
   );

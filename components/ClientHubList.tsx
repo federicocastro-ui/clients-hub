@@ -3,17 +3,16 @@
 import { useState } from 'react'
 import { Badge } from './Badge'
 import {
+  AGENT_INACTIVE_BADGE,
+  AGENT_LIVE_BADGE,
   AGENT_STAGE_BADGE,
   AGENT_STAGE_LABELS,
-  CLIENT_STATUS_BADGE,
-  CLIENT_STATUS_LABELS,
   SUB_ACCOUNT_STATUS_BADGE,
   SUB_ACCOUNT_STATUS_LABELS,
 } from '@/lib/display'
-import type { ClientStatus } from '@/lib/database.types'
+import type { SubAccountStatus } from '@/lib/database.types'
 import type {
   AgentRow,
-  ClientGroup,
   PersonRef,
   StatusGroup,
   SubAccountRow,
@@ -38,47 +37,28 @@ function people(set: PersonRef[]): string {
   return set.map((p) => p.name).join(', ')
 }
 
-// Columnas de la fila de sub cuenta. Definidas como template para poder
-// sumar columnas nuevas después sin romper el layout.
-// chevron · Sub cuenta · Tier · Agentes · Onb · CS · IE · Status
+// Columnas de la fila de sub cuenta (template para sumar columnas sin romper
+// el layout). El status NO es columna: es el agrupador de la sección.
+// chevron · Cliente · Sub cuenta · Tier · Agentes · Onb · CS · IE
 const SUB_GRID =
-  'grid grid-cols-[1.25rem_minmax(7rem,1.3fr)_3rem_4rem_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_minmax(5.5rem,1fr)_7rem] items-center gap-2'
+  'grid grid-cols-[1.25rem_minmax(6rem,1fr)_minmax(6rem,1.1fr)_2.75rem_3.5rem_minmax(5rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)] items-center gap-2'
 
-// Agente · Etapa · País · Mora
+// Agente · Etapa · País · Mora · Live · Activo
 const AGENT_GRID =
-  'grid grid-cols-[minmax(12rem,2fr)_11rem_minmax(6rem,1fr)_5rem] items-center gap-2'
+  'grid grid-cols-[minmax(8rem,1.6fr)_9rem_minmax(4rem,0.8fr)_3.5rem_3.25rem_4rem] items-center gap-2'
 
 export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
-  // Default: todo colapsado salvo las secciones de status (así se ve la
-  // lista de clientes). Trackeamos lo EXPANDIDO; vacío = colapsado.
-  const [collapsedStatus, setCollapsedStatus] = useState<Set<ClientStatus>>(new Set())
-  const [expandedClients, setExpandedClients] = useState<Set<string>>(new Set())
+  // Default: secciones de status abiertas, sub cuentas colapsadas.
+  // Trackeamos lo EXPANDIDO; vacío = colapsado.
+  const [collapsedStatus, setCollapsedStatus] = useState<Set<SubAccountStatus>>(new Set())
   const [expandedSubs, setExpandedSubs] = useState<Set<string>>(new Set())
 
-  const toggleStatus = (s: ClientStatus) =>
+  const toggleStatus = (s: SubAccountStatus) =>
     setCollapsedStatus((prev) => {
       const next = new Set(prev)
       next.has(s) ? next.delete(s) : next.add(s)
       return next
     })
-
-  const toggleClient = (client: ClientGroup) => {
-    const isOpen = expandedClients.has(client.id)
-    setExpandedClients((prev) => {
-      const next = new Set(prev)
-      isOpen ? next.delete(client.id) : next.add(client.id)
-      return next
-    })
-    // Al colapsar un cliente, reseteamos sus sub cuentas a colapsadas: al
-    // re-abrir el cliente, las sub cuentas vuelven a estar comprimidas.
-    if (isOpen) {
-      setExpandedSubs((prev) => {
-        const next = new Set(prev)
-        client.subAccounts.forEach((s) => next.delete(s.id))
-        return next
-      })
-    }
-  }
 
   const toggleSub = (id: string) =>
     setExpandedSubs((prev) => {
@@ -90,7 +70,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
   if (groups.length === 0) {
     return (
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
-        No hay clientes para mostrar.
+        No hay sub cuentas para mostrar.
       </div>
     )
   }
@@ -101,114 +81,55 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
         const statusOpen = !collapsedStatus.has(group.status)
         return (
           <section key={group.status}>
-            {/* Nivel 1: status del cliente */}
+            {/* Nivel 1: status de sub cuenta */}
             <button
               onClick={() => toggleStatus(group.status)}
               className="mb-2 flex w-full items-center gap-2 text-left"
             >
               <Chevron open={statusOpen} />
               <Badge
-                label={CLIENT_STATUS_LABELS[group.status]}
-                className={CLIENT_STATUS_BADGE[group.status]}
+                label={SUB_ACCOUNT_STATUS_LABELS[group.status]}
+                className={SUB_ACCOUNT_STATUS_BADGE[group.status]}
               />
               <span className="text-xs text-zinc-500">
-                {group.clientCount} {group.clientCount === 1 ? 'cliente' : 'clientes'}
+                {group.subAccountCount} sub{' '}
+                {group.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
               </span>
             </button>
 
             {statusOpen && (
-              <div className="flex flex-col gap-3">
-                {group.clients.map((client) => (
-                  <ClientCard
-                    key={client.id}
-                    client={client}
-                    open={expandedClients.has(client.id)}
-                    onToggle={() => toggleClient(client)}
-                    expandedSubs={expandedSubs}
-                    toggleSub={toggleSub}
-                  />
-                ))}
+              <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
+                {/* Encabezado de columnas */}
+                <div
+                  className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
+                >
+                  <span />
+                  <span>Cliente</span>
+                  <span>Sub cuenta</span>
+                  <span>Tier</span>
+                  <span>Agentes</span>
+                  <span>Onb</span>
+                  <span>CS</span>
+                  <span>IE</span>
+                </div>
+
+                {/* Nivel 2: sub cuentas, con tonos alternados */}
+                <div className="flex flex-col gap-1.5 p-1.5">
+                  {group.subAccounts.map((sub, i) => (
+                    <SubAccountBlock
+                      key={sub.id}
+                      sub={sub}
+                      index={i}
+                      open={expandedSubs.has(sub.id)}
+                      onToggle={() => toggleSub(sub.id)}
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </section>
         )
       })}
-    </div>
-  )
-}
-
-function ClientCard({
-  client,
-  open,
-  onToggle,
-  expandedSubs,
-  toggleSub,
-}: {
-  client: ClientGroup
-  open: boolean
-  onToggle: () => void
-  expandedSubs: Set<string>
-  toggleSub: (id: string) => void
-}) {
-  return (
-    <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
-      {/* Nivel 2: cliente (resumen de alto nivel), colapsable. El status no se
-          repite acá: ya está en el encabezado de la sección que los agrupa. */}
-      <button
-        onClick={onToggle}
-        className={`flex w-full items-start gap-2 px-3 py-2.5 text-left hover:bg-zinc-800/30 ${open ? 'border-b border-zinc-800' : ''}`}
-      >
-        <span className="mt-0.5">
-          <Chevron open={open} />
-        </span>
-        <span className="min-w-0">
-          <span className="text-sm font-semibold text-zinc-100">{client.name}</span>
-          <span className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-zinc-400">
-            <span>
-              {client.subAccountCount} sub {client.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
-            </span>
-            <span className="text-zinc-600">·</span>
-            <span>{client.agentCount} agentes</span>
-            {client.tiposDeMora.length > 0 && (
-              <>
-                <span className="text-zinc-600">·</span>
-                <span>{client.tiposDeMora.join(', ')}</span>
-              </>
-            )}
-          </span>
-        </span>
-      </button>
-
-      {open && (
-        <>
-          {/* Encabezado de columnas de sub cuentas */}
-          <div
-            className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
-          >
-            <span />
-            <span>Sub cuenta</span>
-            <span>Tier</span>
-            <span>Agentes</span>
-            <span>Onb</span>
-            <span>CS</span>
-            <span>IE</span>
-            <span>Status</span>
-          </div>
-
-          {/* Nivel 3: sub cuentas — cada una en su bloque, con tonos alternados */}
-          <div className="flex flex-col gap-1.5 p-1.5">
-            {client.subAccounts.map((sub, i) => (
-              <SubAccountBlock
-                key={sub.id}
-                sub={sub}
-                index={i}
-                open={expandedSubs.has(sub.id)}
-                onToggle={() => toggleSub(sub.id)}
-              />
-            ))}
-          </div>
-        </>
-      )}
     </div>
   )
 }
@@ -224,7 +145,6 @@ function SubAccountBlock({
   open: boolean
   onToggle: () => void
 }) {
-  // Tonos alternados para distinguir visualmente una sub cuenta de otra.
   const even = index % 2 === 0
   const headerBg = even ? 'bg-zinc-800/30' : 'bg-zinc-900/70'
   const agentsBg = even ? 'bg-zinc-950/50' : 'bg-black/50'
@@ -236,7 +156,12 @@ function SubAccountBlock({
         className={`${SUB_GRID} w-full px-3 py-2 text-left text-sm ${headerBg} hover:bg-zinc-700/30`}
       >
         <Chevron open={open} />
-        <span className="font-medium text-zinc-100">{sub.name}</span>
+        <span className="truncate text-zinc-400" title={sub.clientName}>
+          {sub.clientName}
+        </span>
+        <span className="truncate font-medium text-zinc-100" title={sub.name}>
+          {sub.name}
+        </span>
         <span className="text-zinc-400">T{sub.tier}</span>
         <span className="text-zinc-400">{sub.agentCount}</span>
         <span className="truncate text-zinc-300" title={people(sub.onbSet)}>
@@ -248,26 +173,24 @@ function SubAccountBlock({
         <span className="truncate text-zinc-300" title={people(sub.ieSet)}>
           {people(sub.ieSet)}
         </span>
-        <Badge
-          label={SUB_ACCOUNT_STATUS_LABELS[sub.status]}
-          className={SUB_ACCOUNT_STATUS_BADGE[sub.status]}
-        />
       </button>
 
-      {/* Nivel 4: agentes — recesado y nesteado bajo su sub cuenta */}
+      {/* Nivel 3: agentes */}
       {open && (
         <div className={`border-t border-zinc-800 ${agentsBg}`}>
           {sub.agents.length === 0 ? (
-            <p className="px-3 py-2 pl-9 text-xs text-zinc-500">Sin agentes.</p>
+            <p className="px-3 py-2 pl-6 text-xs text-zinc-500">Sin agentes.</p>
           ) : (
             <>
               <div
-                className={`${AGENT_GRID} px-3 py-1.5 pl-9 text-[11px] font-medium tracking-wide text-zinc-600 uppercase`}
+                className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-[11px] font-medium tracking-wide text-zinc-600 uppercase`}
               >
                 <span>Agente</span>
                 <span>Etapa</span>
                 <span>País</span>
                 <span>Mora</span>
+                <span>Live</span>
+                <span>Activo</span>
               </div>
               {sub.agents.map((agent) => (
                 <AgentRowView key={agent.id} agent={agent} />
@@ -282,7 +205,7 @@ function SubAccountBlock({
 
 function AgentRowView({ agent }: { agent: AgentRow }) {
   return (
-    <div className={`${AGENT_GRID} px-3 py-1.5 pl-9 text-sm hover:bg-zinc-800/30`}>
+    <div className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-sm hover:bg-zinc-800/30`}>
       <span className="truncate font-medium text-zinc-200" title={agent.derivedName}>
         {agent.derivedName}
       </span>
@@ -294,6 +217,20 @@ function AgentRowView({ agent }: { agent: AgentRow }) {
       </span>
       <span className="text-zinc-400">{agent.countryName}</span>
       <span className="text-zinc-400">{agent.tipoDeMora}</span>
+      <span>
+        {agent.isLive ? (
+          <Badge label="Live" className={AGENT_LIVE_BADGE} />
+        ) : (
+          <span className="text-zinc-600">—</span>
+        )}
+      </span>
+      <span>
+        {agent.isActive ? (
+          <span className="text-xs text-zinc-500">Activo</span>
+        ) : (
+          <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />
+        )}
+      </span>
     </div>
   )
 }

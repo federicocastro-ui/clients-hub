@@ -1,12 +1,12 @@
 import type {
   AgentStage,
-  ClientStatus,
   SubAccountStatus,
   TipoDeMora,
 } from './database.types'
 
-// Modelo de vista para la lista jerárquica. Las agregaciones a nivel
-// cliente y sub cuenta son DERIVADAS de los agentes (no columnas).
+// Modelo de vista para la lista jerárquica aplanada:
+//   Status de sub cuenta → Sub cuenta (con cliente como etiqueta) → Agente
+// El cliente ya no es un nivel de agrupación ni tiene status propio.
 
 export interface PersonRef {
   id: string
@@ -19,6 +19,8 @@ export interface AgentRow {
   tipoDeMora: TipoDeMora
   countryName: string
   currentStage: AgentStage
+  isLive: boolean
+  isActive: boolean
   onb: PersonRef | null
   cs: PersonRef | null
   ie: PersonRef | null
@@ -27,6 +29,8 @@ export interface AgentRow {
 export interface SubAccountRow {
   id: string
   name: string
+  clientId: string
+  clientName: string
   tier: number
   status: SubAccountStatus
   agents: AgentRow[]
@@ -37,20 +41,8 @@ export interface SubAccountRow {
   ieSet: PersonRef[]
 }
 
-export interface ClientGroup {
-  id: string
-  name: string
-  status: ClientStatus
-  createdAt: string
-  subAccounts: SubAccountRow[]
-  // Derivados (resumen de alto nivel del cliente)
-  subAccountCount: number
-  agentCount: number
-  tiposDeMora: TipoDeMora[]
-}
-
 export interface StatusGroup {
-  status: ClientStatus
-  clientCount: number
-  clients: ClientGroup[]
+  status: SubAccountStatus
+  subAccountCount: number
+  subAccounts: SubAccountRow[]
 }

@@ -4,10 +4,9 @@
 
 -- ── Enums ────────────────────────────────────────────────────
 
-CREATE TYPE client_status AS ENUM (
-  'en_construccion',
-  'live'
-);
+-- Nota: el cliente NO tiene status. El status vive a nivel sub cuenta
+-- (sub_account_status) y es el agrupador más alto de la lista. A nivel
+-- agente hay dos flags independientes: is_live e is_active.
 
 CREATE TYPE sub_account_status AS ENUM (
   'onboarding',
@@ -50,7 +49,6 @@ CREATE TABLE team_members (
 CREATE TABLE clients (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   name        text NOT NULL,
-  status      client_status NOT NULL DEFAULT 'en_construccion',
   created_at  timestamptz NOT NULL DEFAULT now()
 );
 
@@ -77,6 +75,8 @@ CREATE TABLE agents (
   onb_id           uuid REFERENCES team_members(id),
   cs_id            uuid REFERENCES team_members(id),
   ie_id            uuid REFERENCES team_members(id),
+  is_live          boolean NOT NULL DEFAULT false,  -- agente en vivo (manual, independiente del stage)
+  is_active        boolean NOT NULL DEFAULT true,   -- vigente (true) vs dado de baja (false)
   linear_url       text,
   notion_url       text,
   figma_url        text,

@@ -3,9 +3,9 @@ import type { RawClient } from './queries'
 // ─────────────────────────────────────────────────────────────
 // Dataset mock SOLO para desarrollo / verificación visual.
 // Se usa como fallback cuando NEXT_PUBLIC_SUPABASE_URL no está
-// configurado. Replica el seed de Ilumia (supabase/seeds/001) y
-// agrega un segundo cliente "acme" en_construccion para demostrar
-// el agrupamiento por status y las agregaciones derivadas.
+// configurado. La lista se agrupa por status de SUB CUENTA, así que
+// las sub cuentas están repartidas en varios status para demostrar
+// el agrupamiento. Los agentes tienen is_live e is_active.
 //
 // Para quitarlo: borrar este archivo y el fallback en queries.ts.
 // ─────────────────────────────────────────────────────────────
@@ -14,7 +14,6 @@ const valentina = { id: 'tm-1', name: 'Valentina Ríos' }
 const martin = { id: 'tm-2', name: 'Martín Sosa' }
 const lucia = { id: 'tm-3', name: 'Lucía Mendez' }
 const diego = { id: 'tm-4', name: 'Diego Fernández' }
-
 const sofia = { id: 'tm-5', name: 'Sofía Castro' }
 const tomas = { id: 'tm-6', name: 'Tomás Vega' }
 
@@ -27,7 +26,6 @@ export const MOCK_CLIENTS: RawClient[] = [
   {
     id: 'cl-1',
     name: 'ilumia',
-    status: 'live',
     created_at: '2026-05-10T12:00:00Z',
     sub_accounts: [
       {
@@ -40,6 +38,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-1',
             tipo_de_mora: 'B0',
             current_stage: 'en_produccion',
+            is_live: true,
+            is_active: true,
             country: argentina,
             onb: valentina,
             cs: martin,
@@ -49,6 +49,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-2',
             tipo_de_mora: 'B1',
             current_stage: 'iterando_qa',
+            is_live: false,
+            is_active: true,
             country: argentina,
             onb: valentina,
             cs: martin,
@@ -61,7 +63,6 @@ export const MOCK_CLIENTS: RawClient[] = [
   {
     id: 'cl-2',
     name: 'acme',
-    status: 'en_construccion',
     created_at: '2026-05-28T09:30:00Z',
     sub_accounts: [
       {
@@ -74,6 +75,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-3',
             tipo_de_mora: 'B2',
             current_stage: 'en_construccion',
+            is_live: false,
+            is_active: true,
             country: mexico,
             onb: valentina,
             cs: lucia,
@@ -83,6 +86,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-4',
             tipo_de_mora: 'Judicial',
             current_stage: 'backlog',
+            is_live: false,
+            is_active: true,
             country: argentina,
             onb: martin,
             cs: lucia,
@@ -94,12 +99,14 @@ export const MOCK_CLIENTS: RawClient[] = [
         id: 'sa-3',
         name: 'Créditos',
         tier: 3,
-        status: 'churn_risk',
+        status: 'churned',
         agents: [
           {
             id: 'ag-5',
             tipo_de_mora: 'B3',
             current_stage: 'entregado_qa',
+            is_live: false,
+            is_active: false, // dado de baja (sub cuenta churned)
             country: mexico,
             onb: martin,
             cs: martin,
@@ -112,7 +119,6 @@ export const MOCK_CLIENTS: RawClient[] = [
   {
     id: 'cl-3',
     name: 'nexa',
-    status: 'live',
     created_at: '2026-04-15T10:00:00Z',
     sub_accounts: [
       {
@@ -125,6 +131,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-6',
             tipo_de_mora: 'B0',
             current_stage: 'en_produccion',
+            is_live: true,
+            is_active: true,
             country: colombia,
             onb: sofia,
             cs: tomas,
@@ -134,6 +142,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-7',
             tipo_de_mora: 'B1',
             current_stage: 'iterando_cliente',
+            is_live: true,
+            is_active: true,
             country: colombia,
             onb: sofia,
             cs: tomas,
@@ -151,6 +161,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-8',
             tipo_de_mora: 'B2',
             current_stage: 'listo_para_mostrar',
+            is_live: false,
+            is_active: true,
             country: chile,
             onb: sofia,
             cs: martin,
@@ -163,19 +175,20 @@ export const MOCK_CLIENTS: RawClient[] = [
   {
     id: 'cl-4',
     name: 'vala',
-    status: 'en_construccion',
     created_at: '2026-05-30T14:20:00Z',
     sub_accounts: [
       {
         id: 'sa-6',
         name: 'Cobranza temprana',
         tier: 4,
-        status: 'onboarding',
+        status: 'adoption',
         agents: [
           {
             id: 'ag-9',
             tipo_de_mora: 'B3',
             current_stage: 'nuevo',
+            is_live: false,
+            is_active: true,
             country: mexico,
             onb: valentina,
             cs: sofia,
@@ -185,6 +198,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             id: 'ag-10',
             tipo_de_mora: 'B4',
             current_stage: 'en_construccion',
+            is_live: false,
+            is_active: true,
             country: argentina,
             onb: valentina,
             cs: sofia,

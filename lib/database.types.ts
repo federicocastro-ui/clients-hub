@@ -1,4 +1,3 @@
-export type ClientStatus = 'en_construccion' | 'live'
 export type SubAccountStatus = 'onboarding' | 'adoption' | 'success' | 'renewal' | 'churn_risk' | 'churned'
 export type TipoDeMora = 'B0' | 'B1' | 'B2' | 'B3' | 'B4' | 'Judicial'
 export type AgentStage =
@@ -32,7 +31,6 @@ export interface Database {
         Row: {
           id: string
           name: string
-          status: ClientStatus
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['clients']['Row'], 'id' | 'created_at'> & {
@@ -74,6 +72,8 @@ export interface Database {
           onb_id: string | null
           cs_id: string | null
           ie_id: string | null
+          is_live: boolean
+          is_active: boolean
           linear_url: string | null
           notion_url: string | null
           figma_url: string | null
@@ -122,7 +122,6 @@ export interface Database {
     Views: Record<string, never>
     Functions: Record<string, never>
     Enums: {
-      client_status: ClientStatus
       sub_account_status: SubAccountStatus
       tipo_de_mora: TipoDeMora
       agent_stage: AgentStage

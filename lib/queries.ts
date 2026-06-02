@@ -1,9 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
-import type { Database, AgentStage, ClientStatus, SubAccountStatus, TipoDeMora } from './database.types'
-import { deriveAgentName } from './display'
+import type { Database, AgentStage, SubAccountStatus, TipoDeMora } from './database.types'
+import { deriveAgentName, SUB_ACCOUNT_STATUS_ORDER } from './display'
 import type {
   AgentRow,
-  ClientGroup,
   PersonRef,
   StatusGroup,
   SubAccountRow,
@@ -20,6 +19,8 @@ export interface RawAgent {
   id: string
   tipo_de_mora: TipoDeMora
   current_stage: AgentStage
+  is_live: boolean
+  is_active: boolean
   country: { id: string; name: string } | { id: string; name: string }[] | null
   onb: RawPerson | RawPerson[] | null
   cs: RawPerson | RawPerson[] | null
@@ -37,7 +38,6 @@ export interface RawSubAccount {
 export interface RawClient {
   id: string
   name: string
-  status: ClientStatus
   created_at: string
   sub_accounts: RawSubAccount[]
 }
@@ -49,7 +49,6 @@ function one<T>(value: T | T[] | null | undefined): T | null {
   return value ?? null
 }
 
-const STATUS_ORDER: ClientStatus[] = ['en_construccion', 'live']
 const MORA_ORDER: TipoDeMora[] = ['B0', 'B1', 'B2', 'B3', 'B4', 'Judicial']
 
 // ── Acceso a datos ───────────────────────────────────────────
@@ -77,11 +76,11 @@ async function fetchRawClients(): Promise<RawClient[]> {
     .from('clients')
     .select(
       `
-      id, name, status, created_at,
+      id, name, created_at,
       sub_accounts (
         id, name, tier, status,
         agents (
-          id, tipo_de_mora, current_stage,
+          id, tipo_de_mora, current_stage, is_live, is_active,
           country:countries!country_id ( id, name ),
           onb:team_members!onb_id ( id, name ),
           cs:team_members!cs_id ( id, name ),
@@ -108,17 +107,16 @@ function uniquePeople(people: (PersonRef | null)[]): PersonRef[] {
 
 function buildAgentRow(raw: RawAgent, clientName: string, subAccountName: string): AgentRow {
   const country = one(raw.country)
-  const onb = one(raw.onb)
-  const cs = one(raw.cs)
-  const ie = one(raw.ie)
   return {
     id: raw.id,
     tipoDeMora: raw.tipo_de_mora,
     currentStage: raw.current_stage,
+    isLive: raw.is_live,
+    isActive: raw.is_active,
     countryName: country?.name ?? '—',
-    onb,
-    cs,
-    ie,
+    onb: one(raw.onb),
+    cs: one(raw.cs),
+    ie: one(raw.ie),
     derivedName: deriveAgentName({
       clientName,
       subAccountName,
@@ -128,11 +126,16 @@ function buildAgentRow(raw: RawAgent, clientName: string, subAccountName: string
   }
 }
 
-function buildSubAccountRow(raw: RawSubAccount, clientName: string): SubAccountRow {
-  const agents = raw.agents.map((a) => buildAgentRow(a, clientName, raw.name))
+function buildSubAccountRow(
+  raw: RawSubAccount,
+  client: { id: string; name: string },
+): SubAccountRow {
+  const agents = raw.agents.map((a) => buildAgentRow(a, client.name, raw.name))
   return {
     id: raw.id,
     name: raw.name,
+    clientId: client.id,
+    clientName: client.name,
     tier: raw.tier,
     status: raw.status,
     agents,
@@ -143,39 +146,33 @@ function buildSubAccountRow(raw: RawSubAccount, clientName: string): SubAccountR
   }
 }
 
-function buildClientGroup(raw: RawClient): ClientGroup {
-  const subAccounts = raw.sub_accounts.map((s) => buildSubAccountRow(s, raw.name))
-  const allAgents = subAccounts.flatMap((s) => s.agents)
-
-  const moraSet = new Set(allAgents.map((a) => a.tipoDeMora))
-  const tiposDeMora = MORA_ORDER.filter((m) => moraSet.has(m))
-
-  return {
-    id: raw.id,
-    name: raw.name,
-    status: raw.status,
-    createdAt: raw.created_at,
-    subAccounts,
-    subAccountCount: subAccounts.length,
-    agentCount: allAgents.length,
-    tiposDeMora,
-  }
-}
-
 // ── API pública ──────────────────────────────────────────────
 
 export async function getClientHubData(): Promise<StatusGroup[]> {
   const rawClients = await fetchRawClients()
-  const clients = rawClients.map(buildClientGroup)
 
-  return STATUS_ORDER.map((status) => {
-    const inStatus = clients.filter((c) => c.status === status)
+  // Aplanamos: todas las sub cuentas de todos los clientes en una lista,
+  // cada una con su cliente como etiqueta.
+  const allSubAccounts: SubAccountRow[] = rawClients.flatMap((client) =>
+    client.sub_accounts.map((sa) =>
+      buildSubAccountRow(sa, { id: client.id, name: client.name }),
+    ),
+  )
+
+  // Agrupamos por status de sub cuenta, en el orden definido.
+  return SUB_ACCOUNT_STATUS_ORDER.map((status) => {
+    const inStatus = allSubAccounts
+      .filter((sa) => sa.status === status)
+      .sort(
+        (a, b) =>
+          a.clientName.localeCompare(b.clientName) || a.name.localeCompare(b.name),
+      )
     return {
       status,
-      clientCount: inStatus.length,
-      clients: inStatus.sort((a, b) => a.name.localeCompare(b.name)),
+      subAccountCount: inStatus.length,
+      subAccounts: inStatus,
     }
-  }).filter((group) => group.clients.length > 0)
+  }).filter((group) => group.subAccounts.length > 0)
 }
 
 export function isUsingMockData(): boolean {

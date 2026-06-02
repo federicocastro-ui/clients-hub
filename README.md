@@ -109,6 +109,7 @@ client-hub/
 
 ## Arquitectura y decisiones
 
+- **Status a nivel sub cuenta**: el cliente NO tiene status. El status vive en cada sub cuenta (`sub_account_status`) y es el agrupador más alto de la lista. A nivel agente hay dos flags manuales e independientes: `is_live` (en vivo) e `is_active` (vigente vs dado de baja).
 - **Sin auth por ahora**: el cliente de Supabase usa la anon key. La estructura está lista para sumar Supabase Auth + RLS después sin cambiar el modelo de datos.
 - **Nombre del agente derivado**: se calcula en la UI como `{client.name}: {sub_account.name} - {tipo_de_mora} {country.name}`. No se almacena.
 - **Logging de etapas**: un trigger de Postgres inserta automáticamente en `agent_stage_logs` cada vez que cambia `agents.current_stage`, incluyendo el log inicial al crear el agente.

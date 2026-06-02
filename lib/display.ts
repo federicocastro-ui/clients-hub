@@ -1,6 +1,5 @@
 import type {
   AgentStage,
-  ClientStatus,
   SubAccountStatus,
 } from './database.types'
 
@@ -17,11 +16,6 @@ export const AGENT_STAGE_LABELS: Record<AgentStage, string> = {
   iterando_cliente: 'Iterando con cliente',
 }
 
-export const CLIENT_STATUS_LABELS: Record<ClientStatus, string> = {
-  en_construccion: 'En construcción',
-  live: 'Live',
-}
-
 export const SUB_ACCOUNT_STATUS_LABELS: Record<SubAccountStatus, string> = {
   onboarding: 'Onboarding',
   adoption: 'Adoption',
@@ -30,6 +24,16 @@ export const SUB_ACCOUNT_STATUS_LABELS: Record<SubAccountStatus, string> = {
   churn_risk: 'Churn risk',
   churned: 'Churned',
 }
+
+// Orden del agrupador más alto de la lista (status de sub cuenta).
+export const SUB_ACCOUNT_STATUS_ORDER: SubAccountStatus[] = [
+  'onboarding',
+  'adoption',
+  'success',
+  'renewal',
+  'churn_risk',
+  'churned',
+]
 
 // Orden lógico de las etapas (el agente puede avanzar o retroceder).
 export const AGENT_STAGE_ORDER: AgentStage[] = [
@@ -73,11 +77,6 @@ export const AGENT_STAGE_BADGE: Record<AgentStage, string> = {
   iterando_cliente: 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30',
 }
 
-export const CLIENT_STATUS_BADGE: Record<ClientStatus, string> = {
-  en_construccion: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  live: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-}
-
 export const SUB_ACCOUNT_STATUS_BADGE: Record<SubAccountStatus, string> = {
   onboarding: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
   adoption: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
@@ -86,6 +85,12 @@ export const SUB_ACCOUNT_STATUS_BADGE: Record<SubAccountStatus, string> = {
   churn_risk: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
   churned: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
 }
+
+// ── Tags de agente (independientes entre sí) ─────────────────
+// is_live: el agente está en vivo. is_active: vigente vs dado de baja.
+
+export const AGENT_LIVE_BADGE = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+export const AGENT_INACTIVE_BADGE = 'bg-rose-500/15 text-rose-300 border-rose-500/30'
 
 // ── Nombre derivado del agente ───────────────────────────────
 // Formato: {client.name}: {sub_account.name} - {tipo_de_mora} {country.name}
