@@ -38,15 +38,39 @@ function people(set: PersonRef[]): string {
   return set.map((p) => p.name).join(', ')
 }
 
+// Botón "ojito" para abrir el detalle de la fila.
+function EyeLink({ href, label }: { href: string; label: string }) {
+  return (
+    <Link
+      href={href}
+      onClick={(e) => e.stopPropagation()}
+      title={label}
+      aria-label={label}
+      className="inline-flex h-6 w-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-700/50 hover:text-zinc-100"
+    >
+      <svg
+        viewBox="0 0 16 16"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+      >
+        <path d="M1 8s2.6-4.5 7-4.5S15 8 15 8s-2.6 4.5-7 4.5S1 8 1 8z" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="8" cy="8" r="2" />
+      </svg>
+    </Link>
+  )
+}
+
 // Columnas de la fila de sub cuenta (template para sumar columnas sin romper
 // el layout). El status NO es columna: es el agrupador de la sección.
-// chevron · Cliente · Sub cuenta · Tier · Agentes · Vendedor · Onb · CS · IE
+// chevron · Cliente · Sub cuenta · Tier · Agentes · Vendedor · Onb · CS · IE · ojo
 const SUB_GRID =
-  'grid grid-cols-[1.25rem_minmax(4.5rem,1fr)_minmax(5rem,1.1fr)_2.25rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(4rem,1fr)_minmax(4rem,1fr)] items-center gap-2'
+  'grid grid-cols-[1.25rem_minmax(4.5rem,1fr)_minmax(5rem,1.1fr)_2.25rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(4rem,1fr)_minmax(4rem,1fr)_1.75rem] items-center gap-2'
 
-// Agente · Etapa · País · Mora · Live · Activo
+// Agente · Etapa · País · Mora · Live · Activo · ojo
 const AGENT_GRID =
-  'grid grid-cols-[minmax(8rem,1.6fr)_9rem_minmax(4rem,0.8fr)_3.5rem_3.25rem_4rem] items-center gap-2'
+  'grid grid-cols-[minmax(8rem,1.6fr)_9rem_minmax(4rem,0.8fr)_3.5rem_3.25rem_4rem_1.75rem] items-center gap-2'
 
 export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
   // Default: secciones de status abiertas, sub cuentas colapsadas.
@@ -113,6 +137,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
                   <span>Onb</span>
                   <span>CS</span>
                   <span>IE</span>
+                  <span />
                 </div>
 
                 {/* Nivel 2: sub cuentas, con tonos alternados */}
@@ -176,14 +201,9 @@ function SubAccountBlock({
         >
           {sub.clientName}
         </Link>
-        <Link
-          href={`/sub-accounts/${sub.id}`}
-          onClick={(e) => e.stopPropagation()}
-          className="truncate font-medium text-zinc-100 hover:text-white hover:underline"
-          title={sub.name}
-        >
+        <span className="truncate font-medium text-zinc-100" title={sub.name}>
           {sub.name}
-        </Link>
+        </span>
         <span className="text-zinc-400">T{sub.tier}</span>
         <span className="text-zinc-400">{sub.agentCount}</span>
         <span className="truncate text-zinc-300" title={sub.vendedor?.name ?? '—'}>
@@ -198,6 +218,7 @@ function SubAccountBlock({
         <span className="truncate text-zinc-300" title={people(sub.ieSet)}>
           {people(sub.ieSet)}
         </span>
+        <EyeLink href={`/sub-accounts/${sub.id}`} label="Ver detalle de la sub cuenta" />
       </div>
 
       {/* Nivel 3: agentes */}
@@ -216,6 +237,7 @@ function SubAccountBlock({
                 <span>Mora</span>
                 <span>Live</span>
                 <span>Activo</span>
+                <span />
               </div>
               {sub.agents.map((agent) => (
                 <AgentRowView key={agent.id} agent={agent} />
@@ -231,13 +253,9 @@ function SubAccountBlock({
 function AgentRowView({ agent }: { agent: AgentRow }) {
   return (
     <div className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-sm hover:bg-zinc-800/30`}>
-      <Link
-        href={`/agents/${agent.id}`}
-        className="truncate font-medium text-zinc-200 hover:text-white hover:underline"
-        title={agent.derivedName}
-      >
+      <span className="truncate font-medium text-zinc-200" title={agent.derivedName}>
         {agent.derivedName}
-      </Link>
+      </span>
       <span>
         <Badge
           label={AGENT_STAGE_LABELS[agent.currentStage]}
@@ -260,6 +278,7 @@ function AgentRowView({ agent }: { agent: AgentRow }) {
           <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />
         )}
       </span>
+      <EyeLink href={`/agents/${agent.id}`} label="Ver detalle del agente" />
     </div>
   )
 }
