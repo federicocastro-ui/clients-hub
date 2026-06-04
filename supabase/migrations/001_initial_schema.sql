@@ -53,12 +53,13 @@ CREATE TABLE clients (
 );
 
 CREATE TABLE sub_accounts (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  client_id   uuid NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
-  name        text NOT NULL,
-  tier        int NOT NULL CHECK (tier BETWEEN 1 AND 4),
-  status      sub_account_status NOT NULL DEFAULT 'onboarding',
-  created_at  timestamptz NOT NULL DEFAULT now()
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id    uuid NOT NULL REFERENCES clients(id) ON DELETE CASCADE,
+  name         text NOT NULL,
+  tier         int NOT NULL CHECK (tier BETWEEN 1 AND 4),
+  status       sub_account_status NOT NULL DEFAULT 'onboarding',
+  vendedor_id  uuid REFERENCES team_members(id),  -- vendedor que vendió la sub cuenta
+  created_at   timestamptz NOT NULL DEFAULT now()
 );
 
 CREATE TABLE countries (
@@ -107,6 +108,7 @@ CREATE TABLE agent_stage_logs (
 -- ── Índices ──────────────────────────────────────────────────
 
 CREATE INDEX idx_sub_accounts_client_id    ON sub_accounts(client_id);
+CREATE INDEX idx_sub_accounts_vendedor_id  ON sub_accounts(vendedor_id);
 CREATE INDEX idx_agents_sub_account_id     ON agents(sub_account_id);
 CREATE INDEX idx_agents_country_id         ON agents(country_id);
 CREATE INDEX idx_agents_onb_id             ON agents(onb_id);

@@ -39,9 +39,9 @@ function people(set: PersonRef[]): string {
 
 // Columnas de la fila de sub cuenta (template para sumar columnas sin romper
 // el layout). El status NO es columna: es el agrupador de la sección.
-// chevron · Cliente · Sub cuenta · Tier · Agentes · Onb · CS · IE
+// chevron · Cliente · Sub cuenta · Tier · Agentes · Vendedor · Onb · CS · IE
 const SUB_GRID =
-  'grid grid-cols-[1.25rem_minmax(6rem,1fr)_minmax(6rem,1.1fr)_2.75rem_3.5rem_minmax(5rem,1fr)_minmax(5rem,1fr)_minmax(5rem,1fr)] items-center gap-2'
+  'grid grid-cols-[1.25rem_minmax(4.5rem,1fr)_minmax(5rem,1.1fr)_2.25rem_3rem_minmax(4.5rem,1fr)_minmax(4rem,1fr)_minmax(4rem,1fr)_minmax(4rem,1fr)] items-center gap-2'
 
 // Agente · Etapa · País · Mora · Live · Activo
 const AGENT_GRID =
@@ -108,6 +108,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
                   <span>Sub cuenta</span>
                   <span>Tier</span>
                   <span>Agentes</span>
+                  <span>Vendedor</span>
                   <span>Onb</span>
                   <span>CS</span>
                   <span>IE</span>
@@ -164,6 +165,9 @@ function SubAccountBlock({
         </span>
         <span className="text-zinc-400">T{sub.tier}</span>
         <span className="text-zinc-400">{sub.agentCount}</span>
+        <span className="truncate text-zinc-300" title={sub.vendedor?.name ?? '—'}>
+          {sub.vendedor?.name ?? '—'}
+        </span>
         <span className="truncate text-zinc-300" title={people(sub.onbSet)}>
           {people(sub.onbSet)}
         </span>

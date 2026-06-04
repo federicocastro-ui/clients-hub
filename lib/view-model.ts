@@ -33,6 +33,7 @@ export interface SubAccountRow {
   clientName: string
   tier: number
   status: SubAccountStatus
+  vendedor: PersonRef | null
   agents: AgentRow[]
   // Derivados de los agentes de la sub cuenta
   agentCount: number

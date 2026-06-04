@@ -33,6 +33,7 @@ export const MOCK_CLIENTS: RawClient[] = [
         name: 'Directv',
         tier: 2,
         status: 'success',
+        vendedor: diego,
         agents: [
           {
             id: 'ag-1',
@@ -70,6 +71,7 @@ export const MOCK_CLIENTS: RawClient[] = [
         name: 'Wallet',
         tier: 1,
         status: 'onboarding',
+        vendedor: tomas,
         agents: [
           {
             id: 'ag-3',
@@ -100,6 +102,7 @@ export const MOCK_CLIENTS: RawClient[] = [
         name: 'Créditos',
         tier: 3,
         status: 'churned',
+        vendedor: tomas,
         agents: [
           {
             id: 'ag-5',
@@ -126,6 +129,7 @@ export const MOCK_CLIENTS: RawClient[] = [
         name: 'Tarjetas',
         tier: 1,
         status: 'success',
+        vendedor: sofia,
         agents: [
           {
             id: 'ag-6',
@@ -156,6 +160,7 @@ export const MOCK_CLIENTS: RawClient[] = [
         name: 'Préstamos',
         tier: 2,
         status: 'renewal',
+        vendedor: sofia,
         agents: [
           {
             id: 'ag-8',
@@ -182,6 +187,7 @@ export const MOCK_CLIENTS: RawClient[] = [
         name: 'Cobranza temprana',
         tier: 4,
         status: 'adoption',
+        vendedor: martin,
         agents: [
           {
             id: 'ag-9',

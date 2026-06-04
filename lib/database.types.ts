@@ -46,6 +46,7 @@ export interface Database {
           name: string
           tier: number
           status: SubAccountStatus
+          vendedor_id: string | null
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['sub_accounts']['Row'], 'id' | 'created_at'> & {

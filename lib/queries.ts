@@ -32,6 +32,7 @@ export interface RawSubAccount {
   name: string
   tier: number
   status: SubAccountStatus
+  vendedor: RawPerson | RawPerson[] | null
   agents: RawAgent[]
 }
 
@@ -79,6 +80,7 @@ async function fetchRawClients(): Promise<RawClient[]> {
       id, name, created_at,
       sub_accounts (
         id, name, tier, status,
+        vendedor:team_members!vendedor_id ( id, name ),
         agents (
           id, tipo_de_mora, current_stage, is_live, is_active,
           country:countries!country_id ( id, name ),
@@ -138,6 +140,7 @@ function buildSubAccountRow(
     clientName: client.name,
     tier: raw.tier,
     status: raw.status,
+    vendedor: one(raw.vendedor),
     agents,
     agentCount: agents.length,
     onbSet: uniquePeople(agents.map((a) => a.onb)),

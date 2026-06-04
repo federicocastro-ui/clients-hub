@@ -17,11 +17,12 @@ INSERT INTO team_members (id, name, email) VALUES
 INSERT INTO clients (id, name) VALUES
   ('20000000-0000-0000-0000-000000000001', 'ilumia');
 
--- Sub cuenta
-INSERT INTO sub_accounts (id, client_id, name, tier, status) VALUES
+-- Sub cuenta (vendedor: Diego)
+INSERT INTO sub_accounts (id, client_id, name, tier, status, vendedor_id) VALUES
   ('30000000-0000-0000-0000-000000000001',
    '20000000-0000-0000-0000-000000000001',
-   'Directv', 2, 'success');
+   'Directv', 2, 'success',
+   '10000000-0000-0000-0000-000000000004');
 
 -- Agentes (el trigger insertará el log inicial automáticamente)
 INSERT INTO agents (
