@@ -1,7 +1,10 @@
 import type {
   AgentStage,
   SubAccountStatus,
+  TipoDeMora,
 } from './database.types'
+
+export const TIPO_DE_MORA_ORDER: TipoDeMora[] = ['B0', 'B1', 'B2', 'B3', 'B4', 'Judicial']
 
 // ── Etiquetas legibles (ES) ──────────────────────────────────
 

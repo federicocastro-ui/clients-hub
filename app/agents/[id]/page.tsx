@@ -3,11 +3,13 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { BackLink, Field, Section } from '@/components/detail-ui'
 import { getAgentDetail } from '@/lib/queries'
+import { changeAgentStage_ } from '@/lib/actions'
 import {
   AGENT_INACTIVE_BADGE,
   AGENT_LIVE_BADGE,
   AGENT_STAGE_BADGE,
   AGENT_STAGE_LABELS,
+  AGENT_STAGE_ORDER,
 } from '@/lib/display'
 import {
   buildTimeline,
@@ -48,17 +50,54 @@ export default async function AgentDetailPage({
         <BackLink href="/" label="Volver a la lista" />
       </div>
 
-      <header className="mb-5">
-        <h1 className="text-lg font-semibold text-zinc-100">{agent.derivedName}</h1>
-        <div className="mt-2 flex flex-wrap items-center gap-2">
-          <Badge
-            label={AGENT_STAGE_LABELS[agent.currentStage]}
-            className={AGENT_STAGE_BADGE[agent.currentStage]}
-          />
-          {agent.isLive && <Badge label="Live" className={AGENT_LIVE_BADGE} />}
-          {!agent.isActive && <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />}
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-zinc-100">{agent.derivedName}</h1>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Badge
+              label={AGENT_STAGE_LABELS[agent.currentStage]}
+              className={AGENT_STAGE_BADGE[agent.currentStage]}
+            />
+            {agent.isLive && <Badge label="Live" className={AGENT_LIVE_BADGE} />}
+            {!agent.isActive && <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />}
+          </div>
         </div>
+        <Link
+          href={`/agents/${agent.id}/edit`}
+          className="shrink-0 rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+        >
+          Editar
+        </Link>
       </header>
+
+      {/* Cambiar etapa (dispara un log) */}
+      <form
+        action={changeAgentStage_.bind(null, agent.id)}
+        className="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3"
+      >
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+            Cambiar etapa
+          </span>
+          <select
+            name="current_stage"
+            defaultValue={agent.currentStage}
+            className="rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+          >
+            {AGENT_STAGE_ORDER.map((s) => (
+              <option key={s} value={s}>
+                {AGENT_STAGE_LABELS[s]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button
+          type="submit"
+          className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
+        >
+          Aplicar
+        </button>
+      </form>
 
       <div className="flex flex-col gap-4">
         {/* Información básica */}

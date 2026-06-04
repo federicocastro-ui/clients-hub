@@ -33,11 +33,27 @@ export default async function ClientDetailPage({
         <BackLink href="/" label="Volver a la lista" />
       </div>
 
-      <header className="mb-5">
-        <h1 className="text-lg font-semibold text-zinc-100">{client.name}</h1>
-        <p className="mt-1 text-sm text-zinc-500">
-          Creado el {fmtDate(client.createdAt)}
-        </p>
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-zinc-100">{client.name}</h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            Creado el {fmtDate(client.createdAt)}
+          </p>
+        </div>
+        <div className="flex shrink-0 gap-2">
+          <Link
+            href={`/clients/${client.id}/edit`}
+            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+          >
+            Editar
+          </Link>
+          <Link
+            href={`/sub-accounts/new?clientId=${client.id}`}
+            className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
+          >
+            + Nueva sub cuenta
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-col gap-4">

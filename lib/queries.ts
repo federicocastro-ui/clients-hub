@@ -94,6 +94,7 @@ async function fetchRawClients(): Promise<RawClient[]> {
         vendedor:team_members!vendedor_id ( id, name ),
         agents (
           id, tipo_de_mora, current_stage, is_live, is_active,
+          linear_url, notion_url, figma_url, qa_form_url, manual_url,
           country:countries!country_id ( id, name ),
           onb:team_members!onb_id ( id, name ),
           cs:team_members!cs_id ( id, name ),
@@ -191,6 +192,42 @@ export async function getClientHubData(): Promise<StatusGroup[]> {
 
 export function isUsingMockData(): boolean {
   return !supabaseConfigured()
+}
+
+// ── Datos de referencia (para formularios) ───────────────────
+
+export async function getTeamMembers(): Promise<PersonRef[]> {
+  if (!supabaseConfigured()) {
+    const { MOCK_TEAM_MEMBERS } = await import('./mock-data')
+    return [...MOCK_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name))
+  }
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+  const { data, error } = await supabase
+    .from('team_members')
+    .select('id, name')
+    .order('name')
+  if (error) throw new Error(`Supabase team_members query failed: ${error.message}`)
+  return (data ?? []) as PersonRef[]
+}
+
+export async function getCountries(): Promise<PersonRef[]> {
+  if (!supabaseConfigured()) {
+    const { MOCK_COUNTRIES } = await import('./mock-data')
+    return [...MOCK_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name))
+  }
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+  const { data, error } = await supabase
+    .from('countries')
+    .select('id, name')
+    .order('name')
+  if (error) throw new Error(`Supabase countries query failed: ${error.message}`)
+  return (data ?? []) as PersonRef[]
 }
 
 // ── Detalle ──────────────────────────────────────────────────
@@ -299,6 +336,52 @@ export async function getSubAccountDetail(id: string): Promise<SubAccountDetail 
         isLive: a.isLive,
         isActive: a.isActive,
       })),
+    }
+  }
+  return null
+}
+
+export interface AgentEditData {
+  id: string
+  subAccountId: string
+  tipoDeMora: TipoDeMora
+  countryId: string | null
+  currentStage: AgentStage
+  onbId: string | null
+  csId: string | null
+  ieId: string | null
+  isLive: boolean
+  isActive: boolean
+  linearUrl: string | null
+  notionUrl: string | null
+  figmaUrl: string | null
+  qaFormUrl: string | null
+  manualUrl: string | null
+}
+
+export async function getAgentForEdit(id: string): Promise<AgentEditData | null> {
+  const rawClients = await fetchRawClients()
+  for (const client of rawClients) {
+    for (const sa of client.sub_accounts) {
+      const a = sa.agents.find((ag) => ag.id === id)
+      if (!a) continue
+      return {
+        id: a.id,
+        subAccountId: sa.id,
+        tipoDeMora: a.tipo_de_mora,
+        countryId: one(a.country)?.id ?? null,
+        currentStage: a.current_stage,
+        onbId: one(a.onb)?.id ?? null,
+        csId: one(a.cs)?.id ?? null,
+        ieId: one(a.ie)?.id ?? null,
+        isLive: a.is_live,
+        isActive: a.is_active,
+        linearUrl: a.linear_url ?? null,
+        notionUrl: a.notion_url ?? null,
+        figmaUrl: a.figma_url ?? null,
+        qaFormUrl: a.qa_form_url ?? null,
+        manualUrl: a.manual_url ?? null,
+      }
     }
   }
   return null

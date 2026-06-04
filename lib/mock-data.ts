@@ -22,7 +22,10 @@ const mexico = { id: 'co-2', name: 'México' }
 const colombia = { id: 'co-3', name: 'Colombia' }
 const chile = { id: 'co-4', name: 'Chile' }
 
-export const MOCK_CLIENTS: RawClient[] = [
+const INITIAL_TEAM = [valentina, martin, lucia, diego, sofia, tomas]
+const INITIAL_COUNTRIES = [argentina, mexico, colombia, chile]
+
+const INITIAL_CLIENTS: RawClient[] = [
   {
     id: 'cl-1',
     name: 'ilumia',
@@ -239,7 +242,7 @@ export interface MockStageLog {
   changed_at: string
 }
 
-export const MOCK_STAGE_LOGS: Record<string, MockStageLog[]> = {
+const INITIAL_STAGE_LOGS: Record<string, MockStageLog[]> = {
   // Directv B0 — progresión con un retroceso a en_construccion
   'ag-1': [
     { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(40) },
@@ -262,6 +265,33 @@ export const MOCK_STAGE_LOGS: Record<string, MockStageLog[]> = {
     { from_stage: 'entregado_qa', to_stage: 'iterando_qa', changed_at: daysAgo(4) },
   ],
 }
+
+// ── Store mutable compartido vía globalThis ──────────────────
+// Next bundlea Server Actions y Server Components por separado, lo que puede
+// crear instancias distintas de este módulo. Guardamos el estado en globalThis
+// para que las mutaciones (create/edit) sean visibles desde cualquier bundle.
+
+interface MockStore {
+  clients: RawClient[]
+  countries: { id: string; name: string }[]
+  teamMembers: { id: string; name: string }[]
+  stageLogs: Record<string, MockStageLog[]>
+}
+
+const g = globalThis as unknown as { __klevaMock?: MockStore }
+const store: MockStore =
+  g.__klevaMock ??
+  (g.__klevaMock = {
+    clients: INITIAL_CLIENTS,
+    countries: INITIAL_COUNTRIES,
+    teamMembers: INITIAL_TEAM,
+    stageLogs: INITIAL_STAGE_LOGS,
+  })
+
+export const MOCK_CLIENTS = store.clients
+export const MOCK_COUNTRIES = store.countries
+export const MOCK_TEAM_MEMBERS = store.teamMembers
+export const MOCK_STAGE_LOGS = store.stageLogs
 
 // Para agentes sin logs explícitos: un único log inicial al stage actual.
 export function mockStageLogsFor(agentId: string, currentStage: string): MockStageLog[] {

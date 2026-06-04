@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { BackLink, Field, Section, people } from '@/components/detail-ui'
 import { getSubAccountDetail } from '@/lib/queries'
+import { markChurned_ } from '@/lib/actions'
 import {
   AGENT_INACTIVE_BADGE,
   AGENT_LIVE_BADGE,
@@ -29,23 +30,49 @@ export default async function SubAccountDetailPage({
         <BackLink href="/" label="Volver a la lista" />
       </div>
 
-      <header className="mb-5">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-lg font-semibold text-zinc-100">{sub.name}</h1>
-          <Badge
-            label={SUB_ACCOUNT_STATUS_LABELS[sub.status]}
-            className={SUB_ACCOUNT_STATUS_BADGE[sub.status]}
-          />
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h1 className="text-lg font-semibold text-zinc-100">{sub.name}</h1>
+            <Badge
+              label={SUB_ACCOUNT_STATUS_LABELS[sub.status]}
+              className={SUB_ACCOUNT_STATUS_BADGE[sub.status]}
+            />
+          </div>
+          <p className="mt-1 text-sm text-zinc-500">
+            Cliente:{' '}
+            <Link
+              href={`/clients/${sub.clientId}`}
+              className="text-zinc-300 hover:text-white hover:underline"
+            >
+              {sub.clientName}
+            </Link>
+          </p>
         </div>
-        <p className="mt-1 text-sm text-zinc-500">
-          Cliente:{' '}
+        <div className="flex shrink-0 flex-wrap gap-2">
           <Link
-            href={`/clients/${sub.clientId}`}
-            className="text-zinc-300 hover:text-white hover:underline"
+            href={`/sub-accounts/${sub.id}/edit`}
+            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
           >
-            {sub.clientName}
+            Editar
           </Link>
-        </p>
+          {sub.status !== 'churned' && (
+            <form action={markChurned_.bind(null, sub.id)}>
+              <button
+                type="submit"
+                className="rounded-md border border-rose-500/40 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10"
+              >
+                Marcar churned
+              </button>
+            </form>
+          )}
+          <Link
+            href={`/agents/new?subAccountId=${sub.id}`}
+            className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
+          >
+            + Nuevo agente
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-col gap-4">

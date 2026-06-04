@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ClientHubList } from '@/components/ClientHubList'
 import { getClientHubData, isUsingMockData } from '@/lib/queries'
 
@@ -10,11 +11,19 @@ export default async function Home() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-      <header className="mb-5">
-        <h1 className="text-lg font-semibold text-zinc-100">Client Hub</h1>
-        <p className="text-sm text-zinc-500">
-          Single Source of Truth de clientes, sub cuentas y agentes de Kleva.
-        </p>
+      <header className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-lg font-semibold text-zinc-100">Client Hub</h1>
+          <p className="text-sm text-zinc-500">
+            Single Source of Truth de clientes, sub cuentas y agentes de Kleva.
+          </p>
+        </div>
+        <Link
+          href="/clients/new"
+          className="shrink-0 rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
+        >
+          + Nuevo cliente
+        </Link>
       </header>
 
       {usingMock && (
