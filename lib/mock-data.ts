@@ -45,6 +45,11 @@ export const MOCK_CLIENTS: RawClient[] = [
             onb: valentina,
             cs: martin,
             ie: lucia,
+            linear_url: 'https://linear.app/kleva/issue/DEMO-1',
+            notion_url: 'https://notion.so/kleva/demo-b0',
+            figma_url: 'https://figma.com/file/demo-b0',
+            qa_form_url: 'https://forms.gle/demo-b0',
+            manual_url: 'https://notion.so/kleva/manual-b0',
           },
           {
             id: 'ag-2',
@@ -56,6 +61,8 @@ export const MOCK_CLIENTS: RawClient[] = [
             onb: valentina,
             cs: martin,
             ie: diego,
+            linear_url: 'https://linear.app/kleva/issue/DEMO-2',
+            notion_url: 'https://notion.so/kleva/demo-b1',
           },
         ],
       },
@@ -216,3 +223,51 @@ export const MOCK_CLIENTS: RawClient[] = [
     ],
   },
 ]
+
+// ── Stage logs mock ──────────────────────────────────────────
+// Timestamps relativos a "ahora" para que las duraciones siempre den
+// positivas, sin importar el reloj del sistema. ag-1 (Directv B0)
+// retrocede de etapa (iterando_qa → en_construccion → ...) para validar
+// la acumulación de tiempo cuando una etapa se visita más de una vez.
+
+const DAY = 86_400_000
+const daysAgo = (n: number) => new Date(Date.now() - n * DAY).toISOString()
+
+export interface MockStageLog {
+  from_stage: string | null
+  to_stage: string
+  changed_at: string
+}
+
+export const MOCK_STAGE_LOGS: Record<string, MockStageLog[]> = {
+  // Directv B0 — progresión con un retroceso a en_construccion
+  'ag-1': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(40) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(36) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(33) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(24) },
+    { from_stage: 'entregado_qa', to_stage: 'iterando_qa', changed_at: daysAgo(20) },
+    // retrocede a construcción y vuelve a avanzar
+    { from_stage: 'iterando_qa', to_stage: 'en_construccion', changed_at: daysAgo(17) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(12) },
+    { from_stage: 'entregado_qa', to_stage: 'listo_para_mostrar', changed_at: daysAgo(8) },
+    { from_stage: 'listo_para_mostrar', to_stage: 'en_produccion', changed_at: daysAgo(3) },
+  ],
+  // Directv B1 — progresión simple hasta iterando_qa
+  'ag-2': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(28) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(25) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(22) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(9) },
+    { from_stage: 'entregado_qa', to_stage: 'iterando_qa', changed_at: daysAgo(4) },
+  ],
+}
+
+// Para agentes sin logs explícitos: un único log inicial al stage actual.
+export function mockStageLogsFor(agentId: string, currentStage: string): MockStageLog[] {
+  return (
+    MOCK_STAGE_LOGS[agentId] ?? [
+      { from_stage: null, to_stage: currentStage, changed_at: daysAgo(10) },
+    ]
+  )
+}

@@ -47,3 +47,74 @@ export interface StatusGroup {
   subAccountCount: number
   subAccounts: SubAccountRow[]
 }
+
+// ── Modelos de las vistas de detalle ─────────────────────────
+
+import type { StageLog } from './stage-metrics'
+
+export interface FixedLink {
+  label: string
+  url: string
+}
+
+export interface AgentDetail {
+  id: string
+  derivedName: string
+  tipoDeMora: TipoDeMora
+  countryName: string
+  currentStage: AgentStage
+  isLive: boolean
+  isActive: boolean
+  onb: PersonRef | null
+  cs: PersonRef | null
+  ie: PersonRef | null
+  clientId: string
+  clientName: string
+  subAccountId: string
+  subAccountName: string
+  links: FixedLink[] // los 5 links fijos presentes (no nulos)
+  stageLogs: StageLog[]
+}
+
+export interface SubAccountAgentRow {
+  id: string
+  derivedName: string
+  currentStage: AgentStage
+  tipoDeMora: TipoDeMora
+  countryName: string
+  isLive: boolean
+  isActive: boolean
+}
+
+export interface SubAccountDetail {
+  id: string
+  name: string
+  tier: number
+  status: SubAccountStatus
+  vendedor: PersonRef | null
+  clientId: string
+  clientName: string
+  onbSet: PersonRef[]
+  csSet: PersonRef[]
+  ieSet: PersonRef[]
+  agents: SubAccountAgentRow[]
+}
+
+export interface ClientSubAccountRow {
+  id: string
+  name: string
+  tier: number
+  status: SubAccountStatus
+  vendedor: PersonRef | null
+  agentCount: number
+}
+
+export interface ClientDetail {
+  id: string
+  name: string
+  createdAt: string
+  onbSet: PersonRef[]
+  csSet: PersonRef[]
+  ieSet: PersonRef[]
+  subAccounts: ClientSubAccountRow[]
+}

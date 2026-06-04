@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { Badge } from './Badge'
 import {
   AGENT_INACTIVE_BADGE,
@@ -152,17 +153,37 @@ function SubAccountBlock({
 
   return (
     <div className="overflow-hidden rounded-md border border-zinc-800">
-      <button
+      {/* Fila clickeable (toggle). Cliente y Sub cuenta son links a su
+          detalle (stopPropagation para no togglear al navegar). */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
-        className={`${SUB_GRID} w-full px-3 py-2 text-left text-sm ${headerBg} hover:bg-zinc-700/30`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onToggle()
+          }
+        }}
+        className={`${SUB_GRID} w-full cursor-pointer px-3 py-2 text-left text-sm ${headerBg} hover:bg-zinc-700/30`}
       >
         <Chevron open={open} />
-        <span className="truncate text-zinc-400" title={sub.clientName}>
+        <Link
+          href={`/clients/${sub.clientId}`}
+          onClick={(e) => e.stopPropagation()}
+          className="truncate text-zinc-400 hover:text-zinc-200 hover:underline"
+          title={sub.clientName}
+        >
           {sub.clientName}
-        </span>
-        <span className="truncate font-medium text-zinc-100" title={sub.name}>
+        </Link>
+        <Link
+          href={`/sub-accounts/${sub.id}`}
+          onClick={(e) => e.stopPropagation()}
+          className="truncate font-medium text-zinc-100 hover:text-white hover:underline"
+          title={sub.name}
+        >
           {sub.name}
-        </span>
+        </Link>
         <span className="text-zinc-400">T{sub.tier}</span>
         <span className="text-zinc-400">{sub.agentCount}</span>
         <span className="truncate text-zinc-300" title={sub.vendedor?.name ?? '—'}>
@@ -177,7 +198,7 @@ function SubAccountBlock({
         <span className="truncate text-zinc-300" title={people(sub.ieSet)}>
           {people(sub.ieSet)}
         </span>
-      </button>
+      </div>
 
       {/* Nivel 3: agentes */}
       {open && (
@@ -210,9 +231,13 @@ function SubAccountBlock({
 function AgentRowView({ agent }: { agent: AgentRow }) {
   return (
     <div className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-sm hover:bg-zinc-800/30`}>
-      <span className="truncate font-medium text-zinc-200" title={agent.derivedName}>
+      <Link
+        href={`/agents/${agent.id}`}
+        className="truncate font-medium text-zinc-200 hover:text-white hover:underline"
+        title={agent.derivedName}
+      >
         {agent.derivedName}
-      </span>
+      </Link>
       <span>
         <Badge
           label={AGENT_STAGE_LABELS[agent.currentStage]}
