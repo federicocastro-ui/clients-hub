@@ -24,9 +24,9 @@ export default async function EditSubAccountPage({
   return (
     <main className="mx-auto w-full max-w-lg px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <BackLink href={`/sub-accounts/${id}`} label="Volver a la sub cuenta" />
+        <BackLink href={`/sub-accounts/${id}`} label="Volver al cliente" />
       </div>
-      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Editar sub cuenta</h1>
+      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Editar cliente</h1>
 
       <form action={action} className="flex flex-col gap-4">
         <SubAccountFormFields

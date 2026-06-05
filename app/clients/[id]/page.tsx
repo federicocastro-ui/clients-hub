@@ -51,7 +51,7 @@ export default async function ClientDetailPage({
             href={`/sub-accounts/new?clientId=${client.id}`}
             className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
           >
-            + Nueva sub cuenta
+            + Nuevo cliente
           </Link>
         </div>
       </header>
@@ -59,7 +59,7 @@ export default async function ClientDetailPage({
       <div className="flex flex-col gap-4">
         <Section
           title="Equipo asignado"
-          note="Derivado de los agentes de las sub cuentas del cliente."
+          note="Derivado de los agentes de los clientes de la organización."
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <Field label="Onb">{people(client.onbSet)}</Field>
@@ -68,9 +68,9 @@ export default async function ClientDetailPage({
           </div>
         </Section>
 
-        <Section title="Sub cuentas">
+        <Section title="Clientes">
           {client.subAccounts.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin sub cuentas.</p>
+            <p className="text-sm text-zinc-500">Sin clientes.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-zinc-800/60">
               {client.subAccounts.map((s) => (

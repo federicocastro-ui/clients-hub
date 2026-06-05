@@ -15,14 +15,14 @@ export default async function Home() {
         <div>
           <h1 className="text-lg font-semibold text-zinc-100">Client Hub</h1>
           <p className="text-sm text-zinc-500">
-            Single Source of Truth de clientes, sub cuentas y agentes de Kleva.
+            Single Source of Truth de organizaciones, clientes y agentes de Kleva.
           </p>
         </div>
         <Link
           href="/clients/new"
           className="shrink-0 rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
         >
-          + Nuevo cliente
+          + Nueva organización
         </Link>
       </header>
 

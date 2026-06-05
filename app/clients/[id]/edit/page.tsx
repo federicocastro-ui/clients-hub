@@ -20,9 +20,9 @@ export default async function EditClientPage({
   return (
     <main className="mx-auto w-full max-w-lg px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <BackLink href={`/clients/${id}`} label="Volver al cliente" />
+        <BackLink href={`/clients/${id}`} label="Volver a la organización" />
       </div>
-      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Editar cliente</h1>
+      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Editar organización</h1>
 
       <form action={action} className="flex flex-col gap-4">
         <FieldLabel label="Nombre">

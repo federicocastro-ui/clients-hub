@@ -40,7 +40,7 @@ export default async function SubAccountDetailPage({
             />
           </div>
           <p className="mt-1 text-sm text-zinc-500">
-            Cliente:{' '}
+            Organización:{' '}
             <Link
               href={`/clients/${sub.clientId}`}
               className="text-zinc-300 hover:text-white hover:underline"

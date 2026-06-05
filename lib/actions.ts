@@ -6,6 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { AgentStage, SubAccountStatus, TipoDeMora } from './database.types'
 import {
   MOCK_AGENT_DOCS,
+  MOCK_AGENT_NOTES,
   MOCK_CLIENTS,
   MOCK_COUNTRIES,
   MOCK_STAGE_LOGS,
@@ -371,6 +372,35 @@ export async function removeAgentDocument_(agentId: string, docId: string) {
     if (list) MOCK_AGENT_DOCS[agentId] = list.filter((d) => d.id !== docId)
   } else {
     const { error } = await db().from('agent_documents').delete().eq('id', docId)
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
+}
+
+// ── Notas internas del agente ────────────────────────────────
+
+export async function addAgentNote_(agentId: string, fd: FormData) {
+  const body = str(fd, 'body')
+  const author = strOrNull(fd, 'author')
+  if (!body) throw new Error('La nota no puede estar vacía')
+  if (usingMock()) {
+    const list = MOCK_AGENT_NOTES[agentId] ?? (MOCK_AGENT_NOTES[agentId] = [])
+    list.push({ id: crypto.randomUUID(), body, author, created_at: new Date().toISOString() })
+  } else {
+    const { error } = await db()
+      .from('agent_notes')
+      .insert({ agent_id: agentId, body, author })
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
+}
+
+export async function removeAgentNote_(agentId: string, noteId: string) {
+  if (usingMock()) {
+    const list = MOCK_AGENT_NOTES[agentId]
+    if (list) MOCK_AGENT_NOTES[agentId] = list.filter((n) => n.id !== noteId)
+  } else {
+    const { error } = await db().from('agent_notes').delete().eq('id', noteId)
     if (error) throw new Error(error.message)
   }
   revalidateAll()

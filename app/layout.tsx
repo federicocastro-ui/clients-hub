@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Client Hub · Kleva",
-  description: "Single Source of Truth de clientes, sub cuentas y agentes de Kleva.",
+  description: "Single Source of Truth de organizaciones, clientes y agentes de Kleva.",
 };
 
 export default function RootLayout({

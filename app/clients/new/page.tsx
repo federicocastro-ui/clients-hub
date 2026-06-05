@@ -10,14 +10,14 @@ export default function NewClientPage() {
       <div className="mb-4">
         <BackLink href="/" label="Volver a la lista" />
       </div>
-      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Nuevo cliente</h1>
+      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Nueva organización</h1>
 
       <form action={createClient_} className="flex flex-col gap-4">
         <FieldLabel label="Nombre">
           <input name="name" required autoFocus className={inputCls} />
         </FieldLabel>
         <div className="flex gap-2">
-          <SubmitButton label="Crear cliente" />
+          <SubmitButton label="Crear organización" />
           <CancelLink href="/" />
         </div>
       </form>

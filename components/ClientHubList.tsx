@@ -95,7 +95,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
   if (groups.length === 0) {
     return (
       <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
-        No hay sub cuentas para mostrar.
+        No hay clientes para mostrar.
       </div>
     )
   }
@@ -117,8 +117,8 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
                 className={SUB_ACCOUNT_STATUS_BADGE[group.status]}
               />
               <span className="text-xs text-zinc-500">
-                {group.subAccountCount} sub{' '}
-                {group.subAccountCount === 1 ? 'cuenta' : 'cuentas'}
+                {group.subAccountCount}{' '}
+                {group.subAccountCount === 1 ? 'cliente' : 'clientes'}
               </span>
             </button>
 
@@ -129,8 +129,8 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
                   className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
                 >
                   <span />
+                  <span>Organización</span>
                   <span>Cliente</span>
-                  <span>Sub cuenta</span>
                   <span>Tier</span>
                   <span>Agentes</span>
                   <span>Vendedor</span>
@@ -218,7 +218,7 @@ function SubAccountBlock({
         <span className="truncate text-zinc-300" title={people(sub.ieSet)}>
           {people(sub.ieSet)}
         </span>
-        <EyeLink href={`/sub-accounts/${sub.id}`} label="Ver detalle de la sub cuenta" />
+        <EyeLink href={`/sub-accounts/${sub.id}`} label="Ver detalle del cliente" />
       </div>
 
       {/* Nivel 3: agentes */}

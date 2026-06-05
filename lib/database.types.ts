@@ -119,6 +119,20 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['agent_stage_logs']['Insert']>
       }
+      agent_notes: {
+        Row: {
+          id: string
+          agent_id: string
+          body: string
+          author: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['agent_notes']['Row'], 'id' | 'created_at'> & {
+          id?: string
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['agent_notes']['Insert']>
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

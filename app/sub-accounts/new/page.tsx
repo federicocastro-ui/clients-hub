@@ -25,14 +25,14 @@ export default async function NewSubAccountPage({
       <div className="mb-4">
         <BackLink href={`/clients/${clientId}`} label={`Volver a ${client.name}`} />
       </div>
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Nueva sub cuenta</h1>
-      <p className="mb-5 text-sm text-zinc-500">Cliente: {client.name}</p>
+      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Nuevo cliente</h1>
+      <p className="mb-5 text-sm text-zinc-500">Organización: {client.name}</p>
 
       <form action={createSubAccount_} className="flex flex-col gap-4">
         <input type="hidden" name="client_id" value={clientId} />
         <SubAccountFormFields members={members} />
         <div className="flex gap-2">
-          <SubmitButton label="Crear sub cuenta" />
+          <SubmitButton label="Crear cliente" />
           <CancelLink href={`/clients/${clientId}`} />
         </div>
       </form>

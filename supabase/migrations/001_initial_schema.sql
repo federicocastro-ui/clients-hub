@@ -105,6 +105,15 @@ CREATE TABLE agent_stage_logs (
   changed_by   uuid REFERENCES team_members(id)
 );
 
+-- Notas internas / comentarios del agente (sin auth: author es texto libre).
+CREATE TABLE agent_notes (
+  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  agent_id    uuid NOT NULL REFERENCES agents(id) ON DELETE CASCADE,
+  body        text NOT NULL,
+  author      text,
+  created_at  timestamptz NOT NULL DEFAULT now()
+);
+
 -- ── Índices ──────────────────────────────────────────────────
 
 CREATE INDEX idx_sub_accounts_client_id    ON sub_accounts(client_id);
@@ -115,6 +124,7 @@ CREATE INDEX idx_agents_onb_id             ON agents(onb_id);
 CREATE INDEX idx_agents_cs_id              ON agents(cs_id);
 CREATE INDEX idx_agents_ie_id              ON agents(ie_id);
 CREATE INDEX idx_agent_documents_agent_id  ON agent_documents(agent_id);
+CREATE INDEX idx_agent_notes_agent_id      ON agent_notes(agent_id);
 CREATE INDEX idx_agent_stage_logs_agent_id ON agent_stage_logs(agent_id);
 CREATE INDEX idx_agent_stage_logs_changed_at ON agent_stage_logs(changed_at);
 

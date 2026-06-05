@@ -64,6 +64,13 @@ export interface AgentDocument {
   url: string
 }
 
+export interface AgentNote {
+  id: string
+  body: string
+  author: string | null
+  createdAt: string
+}
+
 export interface AgentDetail {
   id: string
   derivedName: string
