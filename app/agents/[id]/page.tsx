@@ -2,8 +2,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { BackLink, Field, Section } from '@/components/detail-ui'
-import { getAgentDetail } from '@/lib/queries'
-import { changeAgentStage_ } from '@/lib/actions'
+import { getAgentDetail, getAgentDocuments } from '@/lib/queries'
+import {
+  addAgentFile_,
+  addAgentLink_,
+  changeAgentStage_,
+  removeAgentDocument_,
+} from '@/lib/actions'
+import { FieldLabel, SubmitButton, inputCls } from '@/components/form'
 import {
   AGENT_INACTIVE_BADGE,
   AGENT_LIVE_BADGE,
@@ -37,6 +43,7 @@ export default async function AgentDetailPage({
   const { id } = await params
   const agent = await getAgentDetail(id)
   if (!agent) notFound()
+  const documents = await getAgentDocuments(id)
 
   const now = new Date()
   const timeline = buildTimeline(agent.stageLogs, now)
@@ -146,6 +153,87 @@ export default async function AgentDetailPage({
               ))}
             </div>
           )}
+        </Section>
+
+        {/* Documentos extra (links sueltos + archivos) */}
+        <Section
+          title="Documentos"
+          note="Links sueltos y archivos adjuntos, además de los 5 links fijos."
+        >
+          {documents.length === 0 ? (
+            <p className="text-sm text-zinc-500">Sin documentos.</p>
+          ) : (
+            <ul className="mb-4 flex flex-col divide-y divide-zinc-800/60">
+              {documents.map((doc) => (
+                <li key={doc.id} className="flex items-center justify-between gap-3 py-2">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[10px] tracking-wide text-zinc-400 uppercase">
+                      {doc.kind === 'file' ? 'Archivo' : 'Link'}
+                    </span>
+                    <a
+                      href={doc.url}
+                      target={doc.kind === 'link' ? '_blank' : undefined}
+                      rel="noopener noreferrer"
+                      download={doc.kind === 'file' ? doc.label : undefined}
+                      className="truncate text-sm text-zinc-200 hover:text-white hover:underline"
+                    >
+                      {doc.label}
+                    </a>
+                  </span>
+                  <form action={removeAgentDocument_.bind(null, agent.id, doc.id)}>
+                    <button
+                      type="submit"
+                      className="shrink-0 rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-400 hover:border-rose-500/40 hover:text-rose-300"
+                    >
+                      Quitar
+                    </button>
+                  </form>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="grid gap-4 border-t border-zinc-800 pt-4 sm:grid-cols-2">
+            {/* Agregar link */}
+            <form
+              action={addAgentLink_.bind(null, agent.id)}
+              className="flex flex-col gap-2"
+            >
+              <p className="text-xs font-medium text-zinc-400">Agregar link</p>
+              <FieldLabel label="Label">
+                <input name="label" required className={inputCls} />
+              </FieldLabel>
+              <FieldLabel label="URL">
+                <input name="url" type="url" required placeholder="https://…" className={inputCls} />
+              </FieldLabel>
+              <div>
+                <SubmitButton label="Agregar link" />
+              </div>
+            </form>
+
+            {/* Subir archivo */}
+            <form
+              action={addAgentFile_.bind(null, agent.id)}
+              encType="multipart/form-data"
+              className="flex flex-col gap-2"
+            >
+              <p className="text-xs font-medium text-zinc-400">Subir archivo</p>
+              <FieldLabel label="Label" hint="Opcional; por defecto usa el nombre del archivo.">
+                <input name="label" className={inputCls} />
+              </FieldLabel>
+              <FieldLabel label="Archivo">
+                <input
+                  name="file"
+                  type="file"
+                  required
+                  className="text-sm text-zinc-300 file:mr-2 file:rounded-md file:border-0 file:bg-zinc-700 file:px-2 file:py-1 file:text-zinc-100"
+                />
+              </FieldLabel>
+              <div>
+                <SubmitButton label="Subir archivo" />
+              </div>
+            </form>
+          </div>
         </Section>
 
         {/* Métricas de tiempo */}

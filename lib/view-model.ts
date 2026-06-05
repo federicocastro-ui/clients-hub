@@ -57,6 +57,13 @@ export interface FixedLink {
   url: string
 }
 
+export interface AgentDocument {
+  id: string
+  kind: 'link' | 'file'
+  label: string
+  url: string
+}
+
 export interface AgentDetail {
   id: string
   derivedName: string

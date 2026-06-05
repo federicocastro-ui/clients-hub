@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import type { AgentStage, SubAccountStatus, TipoDeMora } from './database.types'
 import {
+  MOCK_AGENT_DOCS,
   MOCK_CLIENTS,
   MOCK_COUNTRIES,
   MOCK_STAGE_LOGS,
@@ -315,6 +316,64 @@ export async function updateAgent_(id: string, fd: FormData) {
   }
   revalidateAll()
   redirect(`/agents/${id}`)
+}
+
+// ── Documentos del agente ────────────────────────────────────
+
+const DOCS_BUCKET = 'agent-documents'
+
+export async function addAgentLink_(agentId: string, fd: FormData) {
+  const label = str(fd, 'label')
+  const url = str(fd, 'url')
+  if (!label || !url) throw new Error('Faltan label o URL')
+  if (usingMock()) {
+    const list = MOCK_AGENT_DOCS[agentId] ?? (MOCK_AGENT_DOCS[agentId] = [])
+    list.push({ id: crypto.randomUUID(), kind: 'link', label, url })
+  } else {
+    const { error } = await db()
+      .from('agent_documents')
+      .insert({ agent_id: agentId, kind: 'link', label, url })
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
+}
+
+export async function addAgentFile_(agentId: string, fd: FormData) {
+  const file = fd.get('file') as File | null
+  const label = str(fd, 'label') || (file?.name ?? 'Archivo')
+  if (!file || file.size === 0) throw new Error('Falta el archivo')
+
+  if (usingMock()) {
+    // Dev: guardamos el archivo como data URL en memoria (descargable).
+    const buf = Buffer.from(await file.arrayBuffer())
+    const dataUrl = `data:${file.type || 'application/octet-stream'};base64,${buf.toString('base64')}`
+    const list = MOCK_AGENT_DOCS[agentId] ?? (MOCK_AGENT_DOCS[agentId] = [])
+    list.push({ id: crypto.randomUUID(), kind: 'file', label, url: dataUrl })
+  } else {
+    const supabase = db()
+    const path = `${agentId}/${crypto.randomUUID()}-${file.name}`
+    const { error: upErr } = await supabase.storage
+      .from(DOCS_BUCKET)
+      .upload(path, file, { upsert: false })
+    if (upErr) throw new Error(upErr.message)
+    const { data: pub } = supabase.storage.from(DOCS_BUCKET).getPublicUrl(path)
+    const { error } = await supabase
+      .from('agent_documents')
+      .insert({ agent_id: agentId, kind: 'file', label, url: pub.publicUrl })
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
+}
+
+export async function removeAgentDocument_(agentId: string, docId: string) {
+  if (usingMock()) {
+    const list = MOCK_AGENT_DOCS[agentId]
+    if (list) MOCK_AGENT_DOCS[agentId] = list.filter((d) => d.id !== docId)
+  } else {
+    const { error } = await db().from('agent_documents').delete().eq('id', docId)
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
 }
 
 export async function changeAgentStage_(id: string, fd: FormData) {

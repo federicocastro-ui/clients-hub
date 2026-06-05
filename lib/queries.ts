@@ -4,6 +4,7 @@ import { deriveAgentName, SUB_ACCOUNT_STATUS_ORDER } from './display'
 import type { StageLog } from './stage-metrics'
 import type {
   AgentDetail,
+  AgentDocument,
   AgentRow,
   ClientDetail,
   FixedLink,
@@ -308,6 +309,24 @@ export async function getAgentDetail(id: string): Promise<AgentDetail | null> {
     }
   }
   return null
+}
+
+export async function getAgentDocuments(agentId: string): Promise<AgentDocument[]> {
+  if (!supabaseConfigured()) {
+    const { MOCK_AGENT_DOCS } = await import('./mock-data')
+    return [...(MOCK_AGENT_DOCS[agentId] ?? [])]
+  }
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+  const { data, error } = await supabase
+    .from('agent_documents')
+    .select('id, kind, label, url')
+    .eq('agent_id', agentId)
+    .order('created_at', { ascending: true })
+  if (error) throw new Error(`Supabase agent_documents query failed: ${error.message}`)
+  return (data ?? []) as unknown as AgentDocument[]
 }
 
 export async function getSubAccountDetail(id: string): Promise<SubAccountDetail | null> {

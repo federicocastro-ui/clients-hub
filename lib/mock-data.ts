@@ -271,11 +271,30 @@ const INITIAL_STAGE_LOGS: Record<string, MockStageLog[]> = {
 // crear instancias distintas de este módulo. Guardamos el estado en globalThis
 // para que las mutaciones (create/edit) sean visibles desde cualquier bundle.
 
+export interface MockAgentDocument {
+  id: string
+  kind: 'link' | 'file'
+  label: string
+  url: string
+}
+
+const INITIAL_AGENT_DOCS: Record<string, MockAgentDocument[]> = {
+  'ag-1': [
+    {
+      id: 'doc-1',
+      kind: 'link',
+      label: 'Carpeta de grabaciones',
+      url: 'https://drive.google.com/kleva/demo-b0',
+    },
+  ],
+}
+
 interface MockStore {
   clients: RawClient[]
   countries: { id: string; name: string }[]
   teamMembers: { id: string; name: string }[]
   stageLogs: Record<string, MockStageLog[]>
+  agentDocs: Record<string, MockAgentDocument[]>
 }
 
 const g = globalThis as unknown as { __klevaMock?: MockStore }
@@ -286,12 +305,14 @@ const store: MockStore =
     countries: INITIAL_COUNTRIES,
     teamMembers: INITIAL_TEAM,
     stageLogs: INITIAL_STAGE_LOGS,
+    agentDocs: INITIAL_AGENT_DOCS,
   })
 
 export const MOCK_CLIENTS = store.clients
 export const MOCK_COUNTRIES = store.countries
 export const MOCK_TEAM_MEMBERS = store.teamMembers
 export const MOCK_STAGE_LOGS = store.stageLogs
+export const MOCK_AGENT_DOCS = store.agentDocs
 
 // Para agentes sin logs explícitos: un único log inicial al stage actual.
 export function mockStageLogsFor(agentId: string, currentStage: string): MockStageLog[] {
