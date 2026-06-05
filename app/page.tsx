@@ -20,7 +20,7 @@ export default async function Home() {
         </div>
         <Link
           href="/clients/new"
-          className="shrink-0 rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
+          className="shrink-0 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
         >
           + Nueva organización
         </Link>

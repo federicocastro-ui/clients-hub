@@ -1,20 +1,34 @@
 @import "tailwindcss";
 
-/* Tema oscuro fijo (marca Kleva). La pasada de diseño completa es Fase 6. */
+/* Tema oscuro de marca (Kleva): fintech sobrio, fondo oscuro con glow blur. */
 :root {
-  --background: #09090b;
+  --background: #0a0b0e;
   --foreground: #fafafa;
+  /* Acento de marca Kleva (azul). Ajustable a su hex exacto cuando se confirme. */
+  --accent: #2e6bff;
+  --accent-hover: #1d5cf0;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  background: var(--background);
+  /* Glow azul con blur arriba (cue de marca) sobre base oscura. */
+  background:
+    radial-gradient(55rem 28rem at 50% -14rem, rgba(46, 107, 255, 0.14), transparent 70%),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Color de selección con el acento. */
+::selection {
+  background: rgba(46, 107, 255, 0.3);
 }

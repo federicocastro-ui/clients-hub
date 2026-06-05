@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Badge } from './Badge'
 import {
@@ -92,17 +92,72 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
       return next
     })
 
-  if (groups.length === 0) {
-    return (
-      <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
-        No hay clientes para mostrar.
-      </div>
-    )
-  }
+  // ── Filtros (operan sobre las asignaciones a nivel agente) ──
+  const [filters, setFilters] = useState({ onb: '', cs: '', ie: '', tier: '' })
+  const setFilter = (key: keyof typeof filters, value: string) =>
+    setFilters((prev) => ({ ...prev, [key]: value }))
+  const clearFilters = () => setFilters({ onb: '', cs: '', ie: '', tier: '' })
+  const anyFilter = Boolean(filters.onb || filters.cs || filters.ie || filters.tier)
+
+  // Opciones derivadas de los datos cargados.
+  const options = useMemo(() => {
+    const onb = new Map<string, string>()
+    const cs = new Map<string, string>()
+    const ie = new Map<string, string>()
+    const tiers = new Set<number>()
+    for (const g of groups)
+      for (const sub of g.subAccounts) {
+        tiers.add(sub.tier)
+        for (const a of sub.agents) {
+          if (a.onb) onb.set(a.onb.id, a.onb.name)
+          if (a.cs) cs.set(a.cs.id, a.cs.name)
+          if (a.ie) ie.set(a.ie.id, a.ie.name)
+        }
+      }
+    const sortPeople = (m: Map<string, string>) =>
+      [...m.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
+    return {
+      onb: sortPeople(onb),
+      cs: sortPeople(cs),
+      ie: sortPeople(ie),
+      tiers: [...tiers].sort((a, b) => a - b),
+    }
+  }, [groups])
+
+  // Una sub cuenta matchea si: tier coincide y algún agente tiene el Onb/CS/IE.
+  const filteredGroups = useMemo(() => {
+    if (!anyFilter) return groups
+    const match = (sub: SubAccountRow) => {
+      if (filters.tier && sub.tier !== Number(filters.tier)) return false
+      if (filters.onb && !sub.agents.some((a) => a.onb?.id === filters.onb)) return false
+      if (filters.cs && !sub.agents.some((a) => a.cs?.id === filters.cs)) return false
+      if (filters.ie && !sub.agents.some((a) => a.ie?.id === filters.ie)) return false
+      return true
+    }
+    return groups
+      .map((g) => {
+        const subAccounts = g.subAccounts.filter(match)
+        return { ...g, subAccounts, subAccountCount: subAccounts.length }
+      })
+      .filter((g) => g.subAccounts.length > 0)
+  }, [groups, filters, anyFilter])
 
   return (
     <div className="flex flex-col gap-6">
-      {groups.map((group) => {
+      <FilterBar
+        options={options}
+        filters={filters}
+        setFilter={setFilter}
+        clearFilters={clearFilters}
+        anyFilter={anyFilter}
+      />
+
+      {filteredGroups.length === 0 ? (
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
+          {anyFilter ? 'Ningún cliente coincide con los filtros.' : 'No hay clientes para mostrar.'}
+        </div>
+      ) : (
+        filteredGroups.map((group) => {
         const statusOpen = !collapsedStatus.has(group.status)
         return (
           <section key={group.status}>
@@ -156,7 +211,97 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
             )}
           </section>
         )
-      })}
+        })
+      )}
+    </div>
+  )
+}
+
+function FilterBar({
+  options,
+  filters,
+  setFilter,
+  clearFilters,
+  anyFilter,
+}: {
+  options: {
+    onb: PersonRef[]
+    cs: PersonRef[]
+    ie: PersonRef[]
+    tiers: number[]
+  }
+  filters: { onb: string; cs: string; ie: string; tier: string }
+  setFilter: (key: 'onb' | 'cs' | 'ie' | 'tier', value: string) => void
+  clearFilters: () => void
+  anyFilter: boolean
+}) {
+  const selectCls =
+    'rounded-md border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-xs text-zinc-200 outline-none focus:border-accent'
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+        Filtros
+      </span>
+      <select
+        value={filters.onb}
+        onChange={(e) => setFilter('onb', e.target.value)}
+        className={selectCls}
+        aria-label="Filtrar por Onb"
+      >
+        <option value="">Onb: todos</option>
+        {options.onb.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+      <select
+        value={filters.cs}
+        onChange={(e) => setFilter('cs', e.target.value)}
+        className={selectCls}
+        aria-label="Filtrar por CS"
+      >
+        <option value="">CS: todos</option>
+        {options.cs.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+      <select
+        value={filters.ie}
+        onChange={(e) => setFilter('ie', e.target.value)}
+        className={selectCls}
+        aria-label="Filtrar por IE"
+      >
+        <option value="">IE: todos</option>
+        {options.ie.map((p) => (
+          <option key={p.id} value={p.id}>
+            {p.name}
+          </option>
+        ))}
+      </select>
+      <select
+        value={filters.tier}
+        onChange={(e) => setFilter('tier', e.target.value)}
+        className={selectCls}
+        aria-label="Filtrar por Tier"
+      >
+        <option value="">Tier: todos</option>
+        {options.tiers.map((t) => (
+          <option key={t} value={t}>
+            T{t}
+          </option>
+        ))}
+      </select>
+      {anyFilter && (
+        <button
+          onClick={clearFilters}
+          className="rounded-md px-2 py-1 text-xs text-zinc-400 hover:text-zinc-100"
+        >
+          Limpiar
+        </button>
+      )}
     </div>
   )
 }

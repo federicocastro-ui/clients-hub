@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { useFormStatus } from 'react-dom'
 
 export const inputCls =
-  'w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-zinc-500'
+  'w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent'
 
 export function FieldLabel({
   label,
@@ -33,7 +33,7 @@ export function SubmitButton({ label = 'Guardar' }: { label?: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white disabled:opacity-60"
+      className="inline-flex items-center rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
     >
       {pending ? 'Guardando…' : label}
     </button>

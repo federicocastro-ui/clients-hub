@@ -49,7 +49,7 @@ export default async function ClientDetailPage({
           </Link>
           <Link
             href={`/sub-accounts/new?clientId=${client.id}`}
-            className="rounded-md bg-zinc-100 px-3 py-1.5 text-sm font-medium text-zinc-900 hover:bg-white"
+            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
           >
             + Nuevo cliente
           </Link>
