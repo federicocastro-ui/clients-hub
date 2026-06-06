@@ -112,7 +112,7 @@ export interface AgentDocument {
   url: string
 }
 
-export interface AgentNote {
+export interface Note {
   id: string
   body: string
   author: string | null

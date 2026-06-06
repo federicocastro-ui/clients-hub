@@ -289,15 +289,16 @@ const INITIAL_AGENT_DOCS: Record<string, MockAgentDocument[]> = {
   ],
 }
 
-export interface MockAgentNote {
+export interface MockNote {
   id: string
   body: string
   author: string | null
   created_at: string
 }
 
-const INITIAL_AGENT_NOTES: Record<string, MockAgentNote[]> = {
-  'ag-1': [
+// Notas por CLIENTE (sub cuenta), keyed por sub_account id.
+const INITIAL_SUBACCOUNT_NOTES: Record<string, MockNote[]> = {
+  'sa-1': [
     {
       id: 'note-1',
       body: 'El cliente pidió bajar la frecuencia de llamados los fines de semana.',
@@ -313,7 +314,7 @@ interface MockStore {
   teamMembers: { id: string; name: string }[]
   stageLogs: Record<string, MockStageLog[]>
   agentDocs: Record<string, MockAgentDocument[]>
-  agentNotes: Record<string, MockAgentNote[]>
+  subAccountNotes: Record<string, MockNote[]>
 }
 
 const g = globalThis as unknown as { __klevaMock?: MockStore }
@@ -325,7 +326,7 @@ const store: MockStore =
     teamMembers: INITIAL_TEAM,
     stageLogs: INITIAL_STAGE_LOGS,
     agentDocs: INITIAL_AGENT_DOCS,
-    agentNotes: INITIAL_AGENT_NOTES,
+    subAccountNotes: INITIAL_SUBACCOUNT_NOTES,
   })
 
 export const MOCK_CLIENTS = store.clients
@@ -333,7 +334,7 @@ export const MOCK_COUNTRIES = store.countries
 export const MOCK_TEAM_MEMBERS = store.teamMembers
 export const MOCK_STAGE_LOGS = store.stageLogs
 export const MOCK_AGENT_DOCS = store.agentDocs
-export const MOCK_AGENT_NOTES = store.agentNotes
+export const MOCK_SUBACCOUNT_NOTES = store.subAccountNotes
 
 // Para agentes sin logs explícitos: un único log inicial al stage actual.
 export function mockStageLogsFor(agentId: string, currentStage: string): MockStageLog[] {

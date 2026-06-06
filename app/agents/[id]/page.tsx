@@ -2,14 +2,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { BackLink, Field, Section } from '@/components/detail-ui'
-import { getAgentDetail, getAgentDocuments, getAgentNotes } from '@/lib/queries'
+import { getAgentDetail, getAgentDocuments } from '@/lib/queries'
 import {
   addAgentFile_,
   addAgentLink_,
-  addAgentNote_,
   changeAgentStage_,
   removeAgentDocument_,
-  removeAgentNote_,
 } from '@/lib/actions'
 import { FieldLabel, SubmitButton, inputCls } from '@/components/form'
 import { AgentStageBadge } from '@/components/StatusBadge'
@@ -39,15 +37,6 @@ function fmtDate(iso: string): string {
   })
 }
 
-function fmtDateTime(iso: string): string {
-  return new Date(iso).toLocaleString('es-AR', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 export default async function AgentDetailPage({
   params,
 }: {
@@ -57,7 +46,6 @@ export default async function AgentDetailPage({
   const agent = await getAgentDetail(id)
   if (!agent) notFound()
   const documents = await getAgentDocuments(id)
-  const notes = await getAgentNotes(id)
 
   const now = new Date()
   const timeline = buildTimeline(agent.stageLogs, now)
@@ -249,61 +237,6 @@ export default async function AgentDetailPage({
               </div>
             </form>
           </div>
-        </Section>
-
-        {/* Notas internas / comentarios */}
-        <Section title="Notas internas" note="Comentarios del equipo. No los ve el cliente.">
-          {/* Agregar nota */}
-          <form
-            action={addAgentNote_.bind(null, agent.id)}
-            className="mb-4 flex flex-col gap-2"
-          >
-            <textarea
-              name="body"
-              required
-              rows={3}
-              placeholder="Escribí una nota interna…"
-              className={`${inputCls} resize-y`}
-            />
-            <div className="flex items-center gap-2">
-              <input
-                name="author"
-                placeholder="Tu nombre (opcional)"
-                className={`${inputCls} max-w-xs`}
-              />
-              <SubmitButton label="Agregar nota" />
-            </div>
-          </form>
-
-          {notes.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin notas todavía.</p>
-          ) : (
-            <ul className="flex flex-col gap-2">
-              {notes.map((note) => (
-                <li
-                  key={note.id}
-                  className="rounded-md border border-zinc-800 bg-zinc-950/40 p-3"
-                >
-                  <div className="mb-1 flex items-center justify-between gap-2">
-                    <span className="text-xs text-zinc-500">
-                      {note.author ? <span className="text-zinc-300">{note.author}</span> : 'Anónimo'}
-                      {' · '}
-                      {fmtDateTime(note.createdAt)}
-                    </span>
-                    <form action={removeAgentNote_.bind(null, agent.id, note.id)}>
-                      <button
-                        type="submit"
-                        className="rounded px-1.5 py-0.5 text-xs text-zinc-500 hover:text-rose-300"
-                      >
-                        Eliminar
-                      </button>
-                    </form>
-                  </div>
-                  <p className="text-sm whitespace-pre-wrap text-zinc-200">{note.body}</p>
-                </li>
-              ))}
-            </ul>
-          )}
         </Section>
 
         {/* Métricas de tiempo */}

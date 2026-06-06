@@ -3,7 +3,8 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { AgentStageBadge, ClientStatusBadge } from '@/components/StatusBadge'
 import { BackLink, Field, Section, people } from '@/components/detail-ui'
-import { getSubAccountDetail } from '@/lib/queries'
+import { NotesPanel } from '@/components/NotesPanel'
+import { getSubAccountDetail, getSubAccountNotes } from '@/lib/queries'
 import {
   AGENT_INACTIVE_BADGE,
   AGENT_INACTIVE_DESC,
@@ -21,9 +22,10 @@ export default async function SubAccountDetailPage({
   const { id } = await params
   const sub = await getSubAccountDetail(id)
   if (!sub) notFound()
+  const notes = await getSubAccountNotes(id)
 
   return (
-    <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
       <div className="mb-4">
         <BackLink href="/" label="Volver a la lista" />
       </div>
@@ -52,7 +54,8 @@ export default async function SubAccountDetailPage({
         </Link>
       </header>
 
-      <div className="flex flex-col gap-4">
+      <div className="grid gap-4 lg:grid-cols-[1fr_22rem] lg:items-start">
+        <div className="flex flex-col gap-4">
         <Section title="Información">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
             <Field label="Tier">T{sub.tier}</Field>
@@ -118,6 +121,11 @@ export default async function SubAccountDetailPage({
             </ul>
           )}
         </Section>
+        </div>
+
+        <div className="lg:sticky lg:top-6">
+          <NotesPanel subAccountId={sub.id} notes={notes} />
+        </div>
       </div>
     </main>
   )

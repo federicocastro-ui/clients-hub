@@ -6,7 +6,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { AgentStage, SubAccountStatus, TipoDeMora } from './database.types'
 import {
   MOCK_AGENT_DOCS,
-  MOCK_AGENT_NOTES,
+  MOCK_SUBACCOUNT_NOTES,
   MOCK_CLIENTS,
   MOCK_COUNTRIES,
   MOCK_STAGE_LOGS,
@@ -368,30 +368,30 @@ export async function removeAgentDocument_(agentId: string, docId: string) {
   revalidateAll()
 }
 
-// ── Notas internas del agente ────────────────────────────────
+// ── Notas internas del cliente (sub cuenta) ──────────────────
 
-export async function addAgentNote_(agentId: string, fd: FormData) {
+export async function addSubAccountNote_(subAccountId: string, fd: FormData) {
   const body = str(fd, 'body')
   const author = strOrNull(fd, 'author')
   if (!body) throw new Error('La nota no puede estar vacía')
   if (usingMock()) {
-    const list = MOCK_AGENT_NOTES[agentId] ?? (MOCK_AGENT_NOTES[agentId] = [])
+    const list = MOCK_SUBACCOUNT_NOTES[subAccountId] ?? (MOCK_SUBACCOUNT_NOTES[subAccountId] = [])
     list.push({ id: crypto.randomUUID(), body, author, created_at: new Date().toISOString() })
   } else {
     const { error } = await db()
-      .from('agent_notes')
-      .insert({ agent_id: agentId, body, author })
+      .from('sub_account_notes')
+      .insert({ sub_account_id: subAccountId, body, author })
     if (error) throw new Error(error.message)
   }
   revalidateAll()
 }
 
-export async function removeAgentNote_(agentId: string, noteId: string) {
+export async function removeSubAccountNote_(subAccountId: string, noteId: string) {
   if (usingMock()) {
-    const list = MOCK_AGENT_NOTES[agentId]
-    if (list) MOCK_AGENT_NOTES[agentId] = list.filter((n) => n.id !== noteId)
+    const list = MOCK_SUBACCOUNT_NOTES[subAccountId]
+    if (list) MOCK_SUBACCOUNT_NOTES[subAccountId] = list.filter((n) => n.id !== noteId)
   } else {
-    const { error } = await db().from('agent_notes').delete().eq('id', noteId)
+    const { error } = await db().from('sub_account_notes').delete().eq('id', noteId)
     if (error) throw new Error(error.message)
   }
   revalidateAll()

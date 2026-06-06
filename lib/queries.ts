@@ -6,7 +6,7 @@ import type {
   AgentDetail,
   AgentDocument,
   AgentEditData,
-  AgentNote,
+  Note,
   AgentRow,
   ClientDetail,
   FixedLink,
@@ -394,10 +394,10 @@ export async function getAgentDocuments(agentId: string): Promise<AgentDocument[
   return (data ?? []) as unknown as AgentDocument[]
 }
 
-export async function getAgentNotes(agentId: string): Promise<AgentNote[]> {
+export async function getSubAccountNotes(subAccountId: string): Promise<Note[]> {
   if (!supabaseConfigured()) {
-    const { MOCK_AGENT_NOTES } = await import('./mock-data')
-    return [...(MOCK_AGENT_NOTES[agentId] ?? [])]
+    const { MOCK_SUBACCOUNT_NOTES } = await import('./mock-data')
+    return [...(MOCK_SUBACCOUNT_NOTES[subAccountId] ?? [])]
       .map((n) => ({ id: n.id, body: n.body, author: n.author, createdAt: n.created_at }))
       .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
   }
@@ -406,11 +406,11 @@ export async function getAgentNotes(agentId: string): Promise<AgentNote[]> {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
   )
   const { data, error } = await supabase
-    .from('agent_notes')
+    .from('sub_account_notes')
     .select('id, body, author, created_at')
-    .eq('agent_id', agentId)
+    .eq('sub_account_id', subAccountId)
     .order('created_at', { ascending: false })
-  if (error) throw new Error(`Supabase agent_notes query failed: ${error.message}`)
+  if (error) throw new Error(`Supabase sub_account_notes query failed: ${error.message}`)
   const rows = (data ?? []) as unknown as Array<{
     id: string
     body: string
