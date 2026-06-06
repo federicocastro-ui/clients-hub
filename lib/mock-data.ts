@@ -29,7 +29,6 @@ const INITIAL_CLIENTS: RawClient[] = [
   {
     id: 'cl-1',
     name: 'ilumia',
-    is_active: true,
     created_at: '2026-05-10T12:00:00Z',
     sub_accounts: [
       {
@@ -75,7 +74,6 @@ const INITIAL_CLIENTS: RawClient[] = [
   {
     id: 'cl-2',
     name: 'acme',
-    is_active: true,
     created_at: '2026-05-28T09:30:00Z',
     sub_accounts: [
       {
@@ -134,7 +132,6 @@ const INITIAL_CLIENTS: RawClient[] = [
   {
     id: 'cl-3',
     name: 'nexa',
-    is_active: true,
     created_at: '2026-04-15T10:00:00Z',
     sub_accounts: [
       {
@@ -193,7 +190,6 @@ const INITIAL_CLIENTS: RawClient[] = [
   {
     id: 'cl-4',
     name: 'vala',
-    is_active: true,
     created_at: '2026-05-30T14:20:00Z',
     sub_accounts: [
       {
@@ -228,14 +224,6 @@ const INITIAL_CLIENTS: RawClient[] = [
         ],
       },
     ],
-  },
-  {
-    // Organización archivada (inactiva): no aparece en el hub, sí en el admin.
-    id: 'cl-5',
-    name: 'zeta corp',
-    is_active: false,
-    created_at: '2026-03-20T08:00:00Z',
-    sub_accounts: [],
   },
 ]
 

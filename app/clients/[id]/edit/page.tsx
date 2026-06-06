@@ -25,10 +25,7 @@ export default async function ManageOrgPage({
         <span className="text-zinc-700">·</span>
         <BackLink href={`/clients/${id}`} label="Ver organización" />
       </div>
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">
-        Gestionar {org.name}
-        {!org.isActive && <span className="ml-2 text-sm text-zinc-500">(inactiva)</span>}
-      </h1>
+      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Gestionar {org.name}</h1>
       <p className="mb-5 text-sm text-zinc-500">
         Editá la organización, sus clientes y agentes. Cada bloque se guarda por separado.
       </p>

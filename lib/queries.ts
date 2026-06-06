@@ -58,7 +58,6 @@ export interface RawSubAccount {
 export interface RawClient {
   id: string
   name: string
-  is_active: boolean
   created_at: string
   sub_accounts: RawSubAccount[]
 }
@@ -97,7 +96,7 @@ async function fetchRawClients(): Promise<RawClient[]> {
     .from('clients')
     .select(
       `
-      id, name, is_active, created_at,
+      id, name, created_at,
       sub_accounts (
         id, name, tier, status,
         vendedor:team_members!vendedor_id ( id, name ),
@@ -175,12 +174,9 @@ function buildSubAccountRow(
 export async function getClientHubData(): Promise<StatusGroup[]> {
   const rawClients = await fetchRawClients()
 
-  // Aplanamos: todas las sub cuentas de las organizaciones ACTIVAS en una
-  // lista, cada una con su organización (client) como etiqueta. Las
-  // organizaciones desactivadas desde el panel admin se ocultan del hub.
-  const allSubAccounts: SubAccountRow[] = rawClients
-    .filter((client) => client.is_active)
-    .flatMap((client) =>
+  // Aplanamos: todas las sub cuentas de todas las organizaciones en una
+  // lista, cada una con su organización (client) como etiqueta.
+  const allSubAccounts: SubAccountRow[] = rawClients.flatMap((client) =>
     client.sub_accounts.map((sa) =>
       buildSubAccountRow(sa, { id: client.id, name: client.name }),
     ),
@@ -214,12 +210,11 @@ export async function getOrganizationsForAdmin(): Promise<OrgAdminRow[]> {
     .map((c) => ({
       id: c.id,
       name: c.name,
-      isActive: c.is_active,
       createdAt: c.created_at,
       subAccountCount: c.sub_accounts.length,
       agentCount: c.sub_accounts.reduce((acc, s) => acc + s.agents.length, 0),
     }))
-    .sort((a, b) => Number(b.isActive) - Number(a.isActive) || a.name.localeCompare(b.name))
+    .sort((a, b) => a.name.localeCompare(b.name))
 }
 
 export async function getOrganizationManageData(orgId: string): Promise<OrgManageData | null> {
@@ -262,7 +257,7 @@ export async function getOrganizationManageData(orgId: string): Promise<OrgManag
     }),
   }))
 
-  return { id: org.id, name: org.name, isActive: org.is_active, clients }
+  return { id: org.id, name: org.name, clients }
 }
 
 // ── Datos de referencia (para formularios) ───────────────────

@@ -5,12 +5,7 @@ import Link from 'next/link'
 import { AgentStageBadge, ClientStatusBadge } from './StatusBadge'
 import { AgentFormFields, SubAccountFormFields } from './entity-forms'
 import { FieldLabel, SubmitButton, inputCls } from './form'
-import {
-  setOrganizationActive_,
-  updateAgent_,
-  updateClient_,
-  updateSubAccount_,
-} from '@/lib/actions'
+import { updateAgent_, updateClient_, updateSubAccount_ } from '@/lib/actions'
 import type { ManageAgent, ManageClient, OrgManageData, PersonRef } from '@/lib/view-model'
 
 function Chevron({ open }: { open: boolean }) {
@@ -49,20 +44,7 @@ export function OrgManager({
     <div className="flex flex-col gap-4">
       {/* Organización */}
       <section className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-        <div className="mb-3 flex items-center justify-between gap-2">
-          <h2 className="text-sm font-semibold text-zinc-200">Organización</h2>
-          <form action={setOrganizationActive_.bind(null, org.id, !org.isActive)}>
-            {org.isActive ? (
-              <button className="rounded-md border border-rose-500/40 px-2 py-1 text-xs text-rose-300 hover:bg-rose-500/10">
-                Desactivar
-              </button>
-            ) : (
-              <button className="rounded-md bg-accent px-2 py-1 text-xs font-medium text-white hover:bg-accent-hover">
-                Activar
-              </button>
-            )}
-          </form>
-        </div>
+        <h2 className="mb-3 text-sm font-semibold text-zinc-200">Organización</h2>
         <form action={updateClient_.bind(null, org.id)} className="flex items-end gap-2">
           <input type="hidden" name="__redirect" value={managePath} />
           <div className="flex-1">

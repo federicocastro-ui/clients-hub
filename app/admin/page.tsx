@@ -1,8 +1,6 @@
 import Link from 'next/link'
-import { Badge } from '@/components/Badge'
 import { BackLink } from '@/components/detail-ui'
 import { getOrganizationsForAdmin, isUsingMockData } from '@/lib/queries'
-import { setOrganizationActive_ } from '@/lib/actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,12 +13,11 @@ function fmtDate(iso: string): string {
 }
 
 const GRID =
-  'grid grid-cols-[minmax(8rem,1.6fr)_5rem_5rem_minmax(6rem,1fr)_6rem_minmax(11rem,auto)] items-center gap-2'
+  'grid grid-cols-[minmax(8rem,1.8fr)_5rem_5rem_minmax(6rem,1fr)_5rem] items-center gap-2'
 
 export default async function AdminPage() {
   const orgs = await getOrganizationsForAdmin()
   const usingMock = isUsingMockData()
-  const activeCount = orgs.filter((o) => o.isActive).length
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-6 sm:px-6">
@@ -32,8 +29,8 @@ export default async function AdminPage() {
         <div>
           <h1 className="text-lg font-semibold text-zinc-100">Administración de organizaciones</h1>
           <p className="text-sm text-zinc-500">
-            {orgs.length} organizaciones · {activeCount} activas. Las inactivas se
-            ocultan del hub.
+            {orgs.length} {orgs.length === 1 ? 'organización' : 'organizaciones'}. Editá cada
+            una para gestionar sus clientes y agentes.
           </p>
         </div>
         <Link
@@ -63,16 +60,12 @@ export default async function AdminPage() {
             <span>Clientes</span>
             <span>Agentes</span>
             <span>Creada</span>
-            <span>Estado</span>
             <span className="text-right">Acciones</span>
           </div>
 
           <div className="divide-y divide-zinc-800/60">
             {orgs.map((org) => (
-              <div
-                key={org.id}
-                className={`${GRID} px-3 py-2 text-sm ${org.isActive ? '' : 'opacity-60'}`}
-              >
+              <div key={org.id} className={`${GRID} px-3 py-2 text-sm`}>
                 <Link
                   href={`/clients/${org.id}`}
                   className="truncate font-medium text-zinc-100 hover:text-white hover:underline"
@@ -83,43 +76,13 @@ export default async function AdminPage() {
                 <span className="text-zinc-400">{org.subAccountCount}</span>
                 <span className="text-zinc-400">{org.agentCount}</span>
                 <span className="text-zinc-400">{fmtDate(org.createdAt)}</span>
-                <span>
-                  {org.isActive ? (
-                    <Badge
-                      label="Activa"
-                      className="bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                    />
-                  ) : (
-                    <Badge
-                      label="Inactiva"
-                      className="bg-zinc-500/15 text-zinc-400 border-zinc-500/30"
-                    />
-                  )}
-                </span>
-                <span className="flex items-center justify-end gap-2">
+                <span className="flex items-center justify-end">
                   <Link
                     href={`/clients/${org.id}/edit`}
                     className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-800"
                   >
                     Editar
                   </Link>
-                  <form action={setOrganizationActive_.bind(null, org.id, !org.isActive)}>
-                    {org.isActive ? (
-                      <button
-                        type="submit"
-                        className="rounded-md border border-rose-500/40 px-2 py-1 text-xs text-rose-300 hover:bg-rose-500/10"
-                      >
-                        Desactivar
-                      </button>
-                    ) : (
-                      <button
-                        type="submit"
-                        className="rounded-md bg-accent px-2 py-1 text-xs font-medium text-white hover:bg-accent-hover"
-                      >
-                        Activar
-                      </button>
-                    )}
-                  </form>
                 </span>
               </div>
             ))}

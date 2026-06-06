@@ -52,7 +52,6 @@ export interface StatusGroup {
 export interface OrgAdminRow {
   id: string
   name: string
-  isActive: boolean
   createdAt: string
   subAccountCount: number
   agentCount: number
@@ -94,7 +93,6 @@ export interface ManageClient {
 export interface OrgManageData {
   id: string
   name: string
-  isActive: boolean
   clients: ManageClient[]
 }
 
