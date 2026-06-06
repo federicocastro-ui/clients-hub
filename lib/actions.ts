@@ -99,6 +99,23 @@ export async function createClient_(fd: FormData) {
   redirect(`/clients/${id}`)
 }
 
+// Wizard: crea la org y avanza al paso de clientes (necesita el id nuevo).
+export async function createOrganizationStep_(fd: FormData) {
+  const name = str(fd, 'name')
+  if (!name) throw new Error('El nombre es obligatorio')
+  let id: string
+  if (usingMock()) {
+    id = crypto.randomUUID()
+    MOCK_CLIENTS.push({ id, name, created_at: new Date().toISOString(), sub_accounts: [] })
+  } else {
+    const { data, error } = await db().from('clients').insert({ name }).select('id').single()
+    if (error) throw new Error(error.message)
+    id = (data as { id: string }).id
+  }
+  revalidateAll()
+  redirect(`/clients/new?step=clients&orgId=${id}`)
+}
+
 export async function updateClient_(id: string, fd: FormData) {
   const name = str(fd, 'name')
   if (!name) throw new Error('El nombre es obligatorio')
@@ -146,7 +163,7 @@ export async function createSubAccount_(fd: FormData) {
     id = (data as { id: string }).id
   }
   revalidateAll()
-  redirect(`/sub-accounts/${id}`)
+  redirect(strOrNull(fd, '__redirect') ?? `/sub-accounts/${id}`)
 }
 
 export async function updateSubAccount_(id: string, fd: FormData) {
@@ -258,7 +275,7 @@ export async function createAgent_(fd: FormData) {
     id = (data as { id: string }).id
   }
   revalidateAll()
-  redirect(`/agents/${id}`)
+  redirect(strOrNull(fd, '__redirect') ?? `/agents/${id}`)
 }
 
 export async function updateAgent_(id: string, fd: FormData) {
