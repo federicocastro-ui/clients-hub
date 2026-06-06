@@ -17,16 +17,21 @@ export function Section({
   title,
   children,
   note,
+  action,
 }: {
   title: string
   children: ReactNode
   note?: string
+  action?: ReactNode
 }) {
   return (
     <section className="rounded-lg border border-zinc-800 bg-zinc-900/40">
-      <div className="border-b border-zinc-800 px-4 py-2.5">
-        <h2 className="text-sm font-semibold text-zinc-200">{title}</h2>
-        {note && <p className="mt-0.5 text-xs text-zinc-500">{note}</p>}
+      <div className="flex items-start justify-between gap-2 border-b border-zinc-800 px-4 py-2.5">
+        <div>
+          <h2 className="text-sm font-semibold text-zinc-200">{title}</h2>
+          {note && <p className="mt-0.5 text-xs text-zinc-500">{note}</p>}
+        </div>
+        {action && <div className="shrink-0">{action}</div>}
       </div>
       <div className="p-4">{children}</div>
     </section>

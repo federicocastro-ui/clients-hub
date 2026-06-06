@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { BackLink, Field, Section, people } from '@/components/detail-ui'
 import { getSubAccountDetail } from '@/lib/queries'
-import { markChurned_ } from '@/lib/actions'
 import {
   AGENT_INACTIVE_BADGE,
   AGENT_LIVE_BADGE,
@@ -49,30 +48,12 @@ export default async function SubAccountDetailPage({
             </Link>
           </p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Link
-            href={`/sub-accounts/${sub.id}/edit`}
-            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
-          >
-            Editar
-          </Link>
-          {sub.status !== 'churned' && (
-            <form action={markChurned_.bind(null, sub.id)}>
-              <button
-                type="submit"
-                className="rounded-md border border-rose-500/40 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10"
-              >
-                Marcar churned
-              </button>
-            </form>
-          )}
-          <Link
-            href={`/agents/new?subAccountId=${sub.id}`}
-            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
-          >
-            + Nuevo agente
-          </Link>
-        </div>
+        <Link
+          href={`/sub-accounts/${sub.id}/edit`}
+          className="shrink-0 rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+        >
+          Editar
+        </Link>
       </header>
 
       <div className="flex flex-col gap-4">
@@ -87,31 +68,50 @@ export default async function SubAccountDetailPage({
           </div>
         </Section>
 
-        <Section title="Agentes">
+        <Section
+          title="Agentes"
+          action={
+            <Link
+              href={`/agents/new?subAccountId=${sub.id}`}
+              aria-label="Nuevo agente"
+              title="Nuevo agente"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-accent text-white hover:bg-accent-hover"
+            >
+              <PlusIcon />
+            </Link>
+          }
+        >
           {sub.agents.length === 0 ? (
             <p className="text-sm text-zinc-500">Sin agentes.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-zinc-800/60">
               {sub.agents.map((a) => (
-                <li key={a.id}>
+                <li
+                  key={a.id}
+                  className="flex items-center justify-between gap-3 py-2 hover:bg-zinc-800/20"
+                >
                   <Link
                     href={`/agents/${a.id}`}
-                    className="flex items-center justify-between gap-3 py-2 hover:bg-zinc-800/30"
+                    className="truncate text-sm font-medium text-zinc-200 hover:text-white hover:underline"
                   >
-                    <span className="truncate text-sm font-medium text-zinc-200">
-                      {a.derivedName}
-                    </span>
-                    <span className="flex shrink-0 items-center gap-2">
-                      {a.isLive && <Badge label="Live" className={AGENT_LIVE_BADGE} />}
-                      {!a.isActive && (
-                        <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />
-                      )}
-                      <Badge
-                        label={AGENT_STAGE_LABELS[a.currentStage]}
-                        className={AGENT_STAGE_BADGE[a.currentStage]}
-                      />
-                    </span>
+                    {a.derivedName}
                   </Link>
+                  <span className="flex shrink-0 items-center gap-2">
+                    {a.isLive && <Badge label="Live" className={AGENT_LIVE_BADGE} />}
+                    {!a.isActive && <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />}
+                    <Badge
+                      label={AGENT_STAGE_LABELS[a.currentStage]}
+                      className={AGENT_STAGE_BADGE[a.currentStage]}
+                    />
+                    <Link
+                      href={`/agents/${a.id}/edit`}
+                      aria-label="Editar agente"
+                      title="Editar agente"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-700/50 hover:text-zinc-100"
+                    >
+                      <PencilIcon />
+                    </Link>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -119,5 +119,21 @@ export default async function SubAccountDetailPage({
         </Section>
       </div>
     </main>
+  )
+}
+
+function PlusIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M8 3.5v9M3.5 8h9" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function PencilIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.5">
+      <path d="M11.5 2.5l2 2L6 12l-2.5.5L4 10l7.5-7.5z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 }

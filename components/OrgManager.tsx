@@ -6,7 +6,6 @@ import { Badge } from './Badge'
 import { AgentFormFields, SubAccountFormFields } from './entity-forms'
 import { FieldLabel, SubmitButton, inputCls } from './form'
 import {
-  markChurned_,
   setOrganizationActive_,
   updateAgent_,
   updateClient_,
@@ -170,14 +169,6 @@ function ClientCard({
             />
             <SubmitButton label="Guardar cliente" />
           </form>
-          {/* Churned: form separado (no anidar forms) */}
-          {client.status !== 'churned' && (
-            <form action={markChurned_.bind(null, client.id)} className="mt-2">
-              <button className="rounded-md border border-rose-500/40 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10">
-                Marcar churned
-              </button>
-            </form>
-          )}
 
           {/* Agentes del cliente */}
           <div className="mt-4 border-t border-zinc-800 pt-3">

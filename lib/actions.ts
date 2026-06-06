@@ -185,20 +185,6 @@ export async function updateSubAccount_(id: string, fd: FormData) {
   redirect(strOrNull(fd, '__redirect') ?? `/sub-accounts/${id}`)
 }
 
-export async function markChurned_(id: string) {
-  if (usingMock()) {
-    const found = mockFindSub(id)
-    if (found) found.sub.status = 'churned'
-  } else {
-    const { error } = await db()
-      .from('sub_accounts')
-      .update({ status: 'churned' })
-      .eq('id', id)
-    if (error) throw new Error(error.message)
-  }
-  revalidateAll()
-}
-
 // ── País ─────────────────────────────────────────────────────
 
 async function resolveCountryId(countryId: string | null, newCountry: string): Promise<string> {
