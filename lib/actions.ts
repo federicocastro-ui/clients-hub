@@ -122,7 +122,7 @@ export async function updateClient_(id: string, fd: FormData) {
     if (error) throw new Error(error.message)
   }
   revalidateAll()
-  redirect(`/clients/${id}`)
+  redirect(strOrNull(fd, '__redirect') ?? `/clients/${id}`)
 }
 
 // ── Sub cuenta ───────────────────────────────────────────────
@@ -182,7 +182,7 @@ export async function updateSubAccount_(id: string, fd: FormData) {
     if (error) throw new Error(error.message)
   }
   revalidateAll()
-  redirect(`/sub-accounts/${id}`)
+  redirect(strOrNull(fd, '__redirect') ?? `/sub-accounts/${id}`)
 }
 
 export async function markChurned_(id: string) {
@@ -333,7 +333,7 @@ export async function updateAgent_(id: string, fd: FormData) {
     if (error) throw new Error(error.message)
   }
   revalidateAll()
-  redirect(`/agents/${id}`)
+  redirect(strOrNull(fd, '__redirect') ?? `/agents/${id}`)
 }
 
 // ── Documentos del agente ────────────────────────────────────

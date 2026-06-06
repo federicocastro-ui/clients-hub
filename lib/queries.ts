@@ -5,16 +5,21 @@ import type { StageLog } from './stage-metrics'
 import type {
   AgentDetail,
   AgentDocument,
+  AgentEditData,
   AgentNote,
   AgentRow,
   ClientDetail,
   FixedLink,
+  ManageAgent,
   OrgAdminRow,
+  OrgManageData,
   PersonRef,
   StatusGroup,
   SubAccountDetail,
   SubAccountRow,
 } from './view-model'
+
+export type { AgentEditData } from './view-model'
 
 // ── Shape "crudo" devuelto por Supabase (nested select) / mock ─
 
@@ -217,6 +222,49 @@ export async function getOrganizationsForAdmin(): Promise<OrgAdminRow[]> {
     .sort((a, b) => Number(b.isActive) - Number(a.isActive) || a.name.localeCompare(b.name))
 }
 
+export async function getOrganizationManageData(orgId: string): Promise<OrgManageData | null> {
+  const rawClients = await fetchRawClients()
+  const org = rawClients.find((c) => c.id === orgId)
+  if (!org) return null
+
+  const clients = org.sub_accounts.map((sa) => ({
+    id: sa.id,
+    name: sa.name,
+    tier: sa.tier,
+    status: sa.status,
+    vendedorId: one(sa.vendedor)?.id ?? null,
+    agents: sa.agents.map((a): ManageAgent => {
+      const country = one(a.country)
+      const countryName = country?.name ?? '—'
+      return {
+        id: a.id,
+        subAccountId: sa.id,
+        tipoDeMora: a.tipo_de_mora,
+        countryId: country?.id ?? null,
+        currentStage: a.current_stage,
+        onbId: one(a.onb)?.id ?? null,
+        csId: one(a.cs)?.id ?? null,
+        ieId: one(a.ie)?.id ?? null,
+        isLive: a.is_live,
+        isActive: a.is_active,
+        linearUrl: a.linear_url ?? null,
+        notionUrl: a.notion_url ?? null,
+        figmaUrl: a.figma_url ?? null,
+        qaFormUrl: a.qa_form_url ?? null,
+        manualUrl: a.manual_url ?? null,
+        label: deriveAgentName({
+          clientName: org.name,
+          subAccountName: sa.name,
+          tipoDeMora: a.tipo_de_mora,
+          countryName,
+        }),
+      }
+    }),
+  }))
+
+  return { id: org.id, name: org.name, isActive: org.is_active, clients }
+}
+
 // ── Datos de referencia (para formularios) ───────────────────
 
 export async function getTeamMembers(): Promise<PersonRef[]> {
@@ -406,24 +454,6 @@ export async function getSubAccountDetail(id: string): Promise<SubAccountDetail 
     }
   }
   return null
-}
-
-export interface AgentEditData {
-  id: string
-  subAccountId: string
-  tipoDeMora: TipoDeMora
-  countryId: string | null
-  currentStage: AgentStage
-  onbId: string | null
-  csId: string | null
-  ieId: string | null
-  isLive: boolean
-  isActive: boolean
-  linearUrl: string | null
-  notionUrl: string | null
-  figmaUrl: string | null
-  qaFormUrl: string | null
-  manualUrl: string | null
 }
 
 export async function getAgentForEdit(id: string): Promise<AgentEditData | null> {

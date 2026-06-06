@@ -1,0 +1,265 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { Badge } from './Badge'
+import { AgentFormFields, SubAccountFormFields } from './entity-forms'
+import { FieldLabel, SubmitButton, inputCls } from './form'
+import {
+  markChurned_,
+  setOrganizationActive_,
+  updateAgent_,
+  updateClient_,
+  updateSubAccount_,
+} from '@/lib/actions'
+import {
+  AGENT_STAGE_BADGE,
+  AGENT_STAGE_LABELS,
+  SUB_ACCOUNT_STATUS_BADGE,
+  SUB_ACCOUNT_STATUS_LABELS,
+} from '@/lib/display'
+import type { ManageAgent, ManageClient, OrgManageData, PersonRef } from '@/lib/view-model'
+
+function Chevron({ open }: { open: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 16 16"
+      className={`h-3.5 w-3.5 shrink-0 text-zinc-500 transition-transform ${open ? 'rotate-90' : ''}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.75"
+    >
+      <path d="M6 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+export function OrgManager({
+  org,
+  countries,
+  members,
+}: {
+  org: OrgManageData
+  countries: PersonRef[]
+  members: PersonRef[]
+}) {
+  const managePath = `/clients/${org.id}/edit`
+  const [openClients, setOpenClients] = useState<Set<string>>(new Set())
+  const toggleClient = (id: string) =>
+    setOpenClients((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+
+  return (
+    <div className="flex flex-col gap-4">
+      {/* Organización */}
+      <section className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-sm font-semibold text-zinc-200">Organización</h2>
+          <form action={setOrganizationActive_.bind(null, org.id, !org.isActive)}>
+            {org.isActive ? (
+              <button className="rounded-md border border-rose-500/40 px-2 py-1 text-xs text-rose-300 hover:bg-rose-500/10">
+                Desactivar
+              </button>
+            ) : (
+              <button className="rounded-md bg-accent px-2 py-1 text-xs font-medium text-white hover:bg-accent-hover">
+                Activar
+              </button>
+            )}
+          </form>
+        </div>
+        <form action={updateClient_.bind(null, org.id)} className="flex items-end gap-2">
+          <input type="hidden" name="__redirect" value={managePath} />
+          <div className="flex-1">
+            <FieldLabel label="Nombre">
+              <input name="name" required defaultValue={org.name} className={inputCls} />
+            </FieldLabel>
+          </div>
+          <SubmitButton />
+        </form>
+      </section>
+
+      {/* Clientes + agentes */}
+      <section className="rounded-lg border border-zinc-800 bg-zinc-900/40">
+        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-2.5">
+          <h2 className="text-sm font-semibold text-zinc-200">
+            Clientes <span className="text-zinc-500">({org.clients.length})</span>
+          </h2>
+          <Link
+            href={`/sub-accounts/new?clientId=${org.id}`}
+            className="rounded-md bg-accent px-2.5 py-1 text-xs font-medium text-white hover:bg-accent-hover"
+          >
+            + Nuevo cliente
+          </Link>
+        </div>
+
+        {org.clients.length === 0 ? (
+          <p className="px-4 py-4 text-sm text-zinc-500">Sin clientes todavía.</p>
+        ) : (
+          <div className="flex flex-col gap-2 p-2">
+            {org.clients.map((client) => (
+              <ClientCard
+                key={client.id}
+                client={client}
+                open={openClients.has(client.id)}
+                onToggle={() => toggleClient(client.id)}
+                managePath={managePath}
+                countries={countries}
+                members={members}
+              />
+            ))}
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
+
+function ClientCard({
+  client,
+  open,
+  onToggle,
+  managePath,
+  countries,
+  members,
+}: {
+  client: ManageClient
+  open: boolean
+  onToggle: () => void
+  managePath: string
+  countries: PersonRef[]
+  members: PersonRef[]
+}) {
+  return (
+    <div className="overflow-hidden rounded-md border border-zinc-800 bg-zinc-800/20">
+      <div className="flex w-full items-center gap-2 px-3 py-2">
+        <button onClick={onToggle} className="flex flex-1 items-center gap-2 text-left">
+          <Chevron open={open} />
+          <span className="text-sm font-medium text-zinc-100">{client.name}</span>
+          <Badge
+            label={SUB_ACCOUNT_STATUS_LABELS[client.status]}
+            className={SUB_ACCOUNT_STATUS_BADGE[client.status]}
+          />
+          <span className="text-xs text-zinc-500">
+            T{client.tier} · {client.agents.length} agentes
+          </span>
+        </button>
+        <Link
+          href={`/sub-accounts/${client.id}`}
+          className="text-xs text-zinc-400 hover:text-zinc-100"
+        >
+          Abrir ↗
+        </Link>
+      </div>
+
+      {open && (
+        <div className="border-t border-zinc-800 bg-zinc-950/40 p-3">
+          {/* Editar cliente */}
+          <form action={updateSubAccount_.bind(null, client.id)} className="flex flex-col gap-3">
+            <input type="hidden" name="__redirect" value={managePath} />
+            <SubAccountFormFields
+              members={members}
+              defaults={{
+                name: client.name,
+                tier: client.tier,
+                status: client.status,
+                vendedorId: client.vendedorId,
+              }}
+            />
+            <SubmitButton label="Guardar cliente" />
+          </form>
+          {/* Churned: form separado (no anidar forms) */}
+          {client.status !== 'churned' && (
+            <form action={markChurned_.bind(null, client.id)} className="mt-2">
+              <button className="rounded-md border border-rose-500/40 px-3 py-1.5 text-sm text-rose-300 hover:bg-rose-500/10">
+                Marcar churned
+              </button>
+            </form>
+          )}
+
+          {/* Agentes del cliente */}
+          <div className="mt-4 border-t border-zinc-800 pt-3">
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-xs font-medium tracking-wide text-zinc-400 uppercase">
+                Agentes ({client.agents.length})
+              </h3>
+              <Link
+                href={`/agents/new?subAccountId=${client.id}`}
+                className="rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-200 hover:bg-zinc-800"
+              >
+                + Nuevo agente
+              </Link>
+            </div>
+            {client.agents.length === 0 ? (
+              <p className="text-xs text-zinc-500">Sin agentes.</p>
+            ) : (
+              <div className="flex flex-col gap-2">
+                {client.agents.map((agent) => (
+                  <AgentCard
+                    key={agent.id}
+                    agent={agent}
+                    managePath={managePath}
+                    countries={countries}
+                    members={members}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function AgentCard({
+  agent,
+  managePath,
+  countries,
+  members,
+}: {
+  agent: ManageAgent
+  managePath: string
+  countries: PersonRef[]
+  members: PersonRef[]
+}) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className="overflow-hidden rounded-md border border-zinc-800 bg-zinc-900/50">
+      <div className="flex w-full items-center gap-2 px-3 py-2">
+        <button onClick={() => setOpen((v) => !v)} className="flex flex-1 items-center gap-2 text-left">
+          <Chevron open={open} />
+          <span className="truncate text-sm text-zinc-200">{agent.label}</span>
+          <Badge
+            label={AGENT_STAGE_LABELS[agent.currentStage]}
+            className={AGENT_STAGE_BADGE[agent.currentStage]}
+          />
+        </button>
+        <Link href={`/agents/${agent.id}`} className="text-xs text-zinc-400 hover:text-zinc-100">
+          Abrir ↗
+        </Link>
+      </div>
+      {open && (
+        <div className="border-t border-zinc-800 bg-zinc-950/40 p-3">
+          <form action={updateAgent_.bind(null, agent.id)} className="flex flex-col gap-3">
+            <input type="hidden" name="__redirect" value={managePath} />
+            <AgentFormFields
+              countries={countries}
+              members={members}
+              showStage={false}
+              defaults={agent}
+            />
+            <div>
+              <SubmitButton label="Guardar agente" />
+            </div>
+          </form>
+          <p className="mt-2 text-xs text-zinc-500">
+            La etapa, notas y documentos se editan desde el detalle del agente (Abrir ↗).
+          </p>
+        </div>
+      )}
+    </div>
+  )
+}

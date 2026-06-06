@@ -6,8 +6,7 @@ import {
   SUB_ACCOUNT_STATUS_ORDER,
   TIPO_DE_MORA_ORDER,
 } from '@/lib/display'
-import type { AgentEditData } from '@/lib/queries'
-import type { PersonRef } from '@/lib/view-model'
+import type { AgentEditData, PersonRef } from '@/lib/view-model'
 import type { AgentStage, SubAccountStatus, TipoDeMora } from '@/lib/database.types'
 
 function PersonSelect({

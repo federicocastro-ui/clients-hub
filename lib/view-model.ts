@@ -58,6 +58,46 @@ export interface OrgAdminRow {
   agentCount: number
 }
 
+// Campos editables de un agente (precarga de formularios).
+export interface AgentEditData {
+  id: string
+  subAccountId: string
+  tipoDeMora: TipoDeMora
+  countryId: string | null
+  currentStage: AgentStage
+  onbId: string | null
+  csId: string | null
+  ieId: string | null
+  isLive: boolean
+  isActive: boolean
+  linearUrl: string | null
+  notionUrl: string | null
+  figmaUrl: string | null
+  qaFormUrl: string | null
+  manualUrl: string | null
+}
+
+// Modelo de la página de gestión de la organización (edición por parte).
+export interface ManageAgent extends AgentEditData {
+  label: string
+}
+
+export interface ManageClient {
+  id: string
+  name: string
+  tier: number
+  status: SubAccountStatus
+  vendedorId: string | null
+  agents: ManageAgent[]
+}
+
+export interface OrgManageData {
+  id: string
+  name: string
+  isActive: boolean
+  clients: ManageClient[]
+}
+
 // ── Modelos de las vistas de detalle ─────────────────────────
 
 import type { StageLog } from './stage-metrics'

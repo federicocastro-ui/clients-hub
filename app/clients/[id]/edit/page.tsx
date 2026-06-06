@@ -1,38 +1,39 @@
 import { notFound } from 'next/navigation'
 import { BackLink } from '@/components/detail-ui'
-import { CancelLink, FieldLabel, SubmitButton, inputCls } from '@/components/form'
-import { updateClient_ } from '@/lib/actions'
-import { getClientDetail } from '@/lib/queries'
+import { OrgManager } from '@/components/OrgManager'
+import { getCountries, getOrganizationManageData, getTeamMembers } from '@/lib/queries'
 
 export const dynamic = 'force-dynamic'
 
-export default async function EditClientPage({
+export default async function ManageOrgPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const client = await getClientDetail(id)
-  if (!client) notFound()
-
-  const action = updateClient_.bind(null, id)
+  const [org, countries, members] = await Promise.all([
+    getOrganizationManageData(id),
+    getCountries(),
+    getTeamMembers(),
+  ])
+  if (!org) notFound()
 
   return (
-    <main className="mx-auto w-full max-w-lg px-4 py-6 sm:px-6">
-      <div className="mb-4">
-        <BackLink href={`/clients/${id}`} label="Volver a la organización" />
+    <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
+      <div className="mb-4 flex items-center gap-3">
+        <BackLink href="/admin" label="Volver al admin" />
+        <span className="text-zinc-700">·</span>
+        <BackLink href={`/clients/${id}`} label="Ver organización" />
       </div>
-      <h1 className="mb-5 text-lg font-semibold text-zinc-100">Editar organización</h1>
+      <h1 className="mb-1 text-lg font-semibold text-zinc-100">
+        Gestionar {org.name}
+        {!org.isActive && <span className="ml-2 text-sm text-zinc-500">(inactiva)</span>}
+      </h1>
+      <p className="mb-5 text-sm text-zinc-500">
+        Editá la organización, sus clientes y agentes. Cada bloque se guarda por separado.
+      </p>
 
-      <form action={action} className="flex flex-col gap-4">
-        <FieldLabel label="Nombre">
-          <input name="name" required defaultValue={client.name} className={inputCls} />
-        </FieldLabel>
-        <div className="flex gap-2">
-          <SubmitButton />
-          <CancelLink href={`/clients/${id}`} />
-        </div>
-      </form>
+      <OrgManager org={org} countries={countries} members={members} />
     </main>
   )
 }
