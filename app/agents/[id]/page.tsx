@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
-import { Field, Section } from '@/components/detail-ui'
+import { Breadcrumb, Field, Section } from '@/components/detail-ui'
 import { BackButton } from '@/components/BackButton'
 import { getAgentDetail, getAgentDocuments } from '@/lib/queries'
 import {
@@ -56,8 +56,17 @@ export default async function AgentDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
-      <div className="mb-4">
+      <div className="mb-4 flex flex-wrap items-center gap-3">
         <BackButton fallback="/" />
+        <span className="text-zinc-700">·</span>
+        <Breadcrumb
+          items={[
+            { label: 'Hub', href: '/' },
+            { label: agent.clientName, href: `/clients/${agent.clientId}` },
+            { label: agent.subAccountName, href: `/sub-accounts/${agent.subAccountId}` },
+            { label: agent.derivedName },
+          ]}
+        />
       </div>
 
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">

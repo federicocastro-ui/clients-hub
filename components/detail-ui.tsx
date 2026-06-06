@@ -13,6 +13,33 @@ export function BackLink({ href, label }: { href: string; label: string }) {
   )
 }
 
+export interface Crumb {
+  label: string
+  href?: string
+}
+
+export function Breadcrumb({ items }: { items: Crumb[] }) {
+  return (
+    <nav
+      aria-label="breadcrumb"
+      className="flex min-w-0 flex-wrap items-center gap-1.5 text-xs text-zinc-500"
+    >
+      {items.map((item, i) => (
+        <span key={i} className="flex min-w-0 items-center gap-1.5">
+          {i > 0 && <span className="text-zinc-700">›</span>}
+          {item.href ? (
+            <Link href={item.href} className="max-w-[16rem] truncate hover:text-zinc-200">
+              {item.label}
+            </Link>
+          ) : (
+            <span className="max-w-[16rem] truncate text-zinc-300">{item.label}</span>
+          )}
+        </span>
+      ))}
+    </nav>
+  )
+}
+
 export function Section({
   title,
   children,
