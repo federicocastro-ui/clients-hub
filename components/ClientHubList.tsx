@@ -3,13 +3,13 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { Badge } from './Badge'
+import { AgentStageBadge, ClientStatusBadge } from './StatusBadge'
 import {
+  AGENT_ACTIVE_DESC,
   AGENT_INACTIVE_BADGE,
+  AGENT_INACTIVE_DESC,
   AGENT_LIVE_BADGE,
-  AGENT_STAGE_BADGE,
-  AGENT_STAGE_LABELS,
-  SUB_ACCOUNT_STATUS_BADGE,
-  SUB_ACCOUNT_STATUS_LABELS,
+  AGENT_LIVE_DESC,
 } from '@/lib/display'
 import type { SubAccountStatus } from '@/lib/database.types'
 import type {
@@ -167,10 +167,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
               className="mb-2 flex w-full items-center gap-2 text-left"
             >
               <Chevron open={statusOpen} />
-              <Badge
-                label={SUB_ACCOUNT_STATUS_LABELS[group.status]}
-                className={SUB_ACCOUNT_STATUS_BADGE[group.status]}
-              />
+              <ClientStatusBadge status={group.status} />
               <span className="text-xs text-zinc-500">
                 {group.subAccountCount}{' '}
                 {group.subAccountCount === 1 ? 'cliente' : 'clientes'}
@@ -402,25 +399,24 @@ function AgentRowView({ agent }: { agent: AgentRow }) {
         {agent.derivedName}
       </span>
       <span>
-        <Badge
-          label={AGENT_STAGE_LABELS[agent.currentStage]}
-          className={AGENT_STAGE_BADGE[agent.currentStage]}
-        />
+        <AgentStageBadge stage={agent.currentStage} />
       </span>
       <span className="text-zinc-400">{agent.countryName}</span>
       <span className="text-zinc-400">{agent.tipoDeMora}</span>
       <span>
         {agent.isLive ? (
-          <Badge label="Live" className={AGENT_LIVE_BADGE} />
+          <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
         ) : (
           <span className="text-zinc-600">—</span>
         )}
       </span>
       <span>
         {agent.isActive ? (
-          <span className="text-xs text-zinc-500">Activo</span>
+          <span className="cursor-help text-xs text-zinc-500" title={AGENT_ACTIVE_DESC}>
+            Activo
+          </span>
         ) : (
-          <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />
+          <Badge label="Baja" className={AGENT_INACTIVE_BADGE} title={AGENT_INACTIVE_DESC} />
         )}
       </span>
       <EyeLink href={`/agents/${agent.id}`} label="Ver detalle del agente" />

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Badge } from './Badge'
+import { AgentStageBadge, ClientStatusBadge } from './StatusBadge'
 import { AgentFormFields, SubAccountFormFields } from './entity-forms'
 import { FieldLabel, SubmitButton, inputCls } from './form'
 import {
@@ -11,12 +11,6 @@ import {
   updateClient_,
   updateSubAccount_,
 } from '@/lib/actions'
-import {
-  AGENT_STAGE_BADGE,
-  AGENT_STAGE_LABELS,
-  SUB_ACCOUNT_STATUS_BADGE,
-  SUB_ACCOUNT_STATUS_LABELS,
-} from '@/lib/display'
 import type { ManageAgent, ManageClient, OrgManageData, PersonRef } from '@/lib/view-model'
 
 function Chevron({ open }: { open: boolean }) {
@@ -137,10 +131,7 @@ function ClientCard({
         <button onClick={onToggle} className="flex flex-1 items-center gap-2 text-left">
           <Chevron open={open} />
           <span className="text-sm font-medium text-zinc-100">{client.name}</span>
-          <Badge
-            label={SUB_ACCOUNT_STATUS_LABELS[client.status]}
-            className={SUB_ACCOUNT_STATUS_BADGE[client.status]}
-          />
+          <ClientStatusBadge status={client.status} />
           <span className="text-xs text-zinc-500">
             T{client.tier} · {client.agents.length} agentes
           </span>
@@ -223,10 +214,7 @@ function AgentCard({
         <button onClick={() => setOpen((v) => !v)} className="flex flex-1 items-center gap-2 text-left">
           <Chevron open={open} />
           <span className="truncate text-sm text-zinc-200">{agent.label}</span>
-          <Badge
-            label={AGENT_STAGE_LABELS[agent.currentStage]}
-            className={AGENT_STAGE_BADGE[agent.currentStage]}
-          />
+          <AgentStageBadge stage={agent.currentStage} />
         </button>
         <Link href={`/agents/${agent.id}`} className="text-xs text-zinc-400 hover:text-zinc-100">
           Abrir ↗

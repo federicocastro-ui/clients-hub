@@ -12,10 +12,12 @@ import {
   removeAgentNote_,
 } from '@/lib/actions'
 import { FieldLabel, SubmitButton, inputCls } from '@/components/form'
+import { AgentStageBadge } from '@/components/StatusBadge'
 import {
   AGENT_INACTIVE_BADGE,
+  AGENT_INACTIVE_DESC,
   AGENT_LIVE_BADGE,
-  AGENT_STAGE_BADGE,
+  AGENT_LIVE_DESC,
   AGENT_STAGE_LABELS,
   AGENT_STAGE_ORDER,
 } from '@/lib/display'
@@ -73,12 +75,13 @@ export default async function AgentDetailPage({
         <div>
           <h1 className="text-lg font-semibold text-zinc-100">{agent.derivedName}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Badge
-              label={AGENT_STAGE_LABELS[agent.currentStage]}
-              className={AGENT_STAGE_BADGE[agent.currentStage]}
-            />
-            {agent.isLive && <Badge label="Live" className={AGENT_LIVE_BADGE} />}
-            {!agent.isActive && <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />}
+            <AgentStageBadge stage={agent.currentStage} />
+            {agent.isLive && (
+              <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
+            )}
+            {!agent.isActive && (
+              <Badge label="Baja" className={AGENT_INACTIVE_BADGE} title={AGENT_INACTIVE_DESC} />
+            )}
           </div>
         </div>
         <Link
@@ -309,10 +312,7 @@ export default async function AgentDetailPage({
             <div className="flex flex-col gap-1.5">
               {stages.map((s) => (
                 <div key={s.stage} className="flex items-center justify-between gap-2">
-                  <Badge
-                    label={AGENT_STAGE_LABELS[s.stage]}
-                    className={AGENT_STAGE_BADGE[s.stage]}
-                  />
+                  <AgentStageBadge stage={s.stage} />
                   <span className="text-sm text-zinc-300">{formatDuration(s.totalMs)}</span>
                 </div>
               ))}
@@ -347,10 +347,7 @@ export default async function AgentDetailPage({
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge
-                      label={AGENT_STAGE_LABELS[e.toStage]}
-                      className={AGENT_STAGE_BADGE[e.toStage]}
-                    />
+                    <AgentStageBadge stage={e.toStage} />
                     <span className="text-xs text-zinc-500">{fmtDate(e.changedAt)}</span>
                     {e.isCurrent && (
                       <span className="text-xs text-emerald-400">etapa actual</span>

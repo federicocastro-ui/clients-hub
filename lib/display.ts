@@ -89,11 +89,37 @@ export const SUB_ACCOUNT_STATUS_BADGE: Record<SubAccountStatus, string> = {
   churned: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
 }
 
+// ── Descripciones (tooltips) ─────────────────────────────────
+
+export const SUB_ACCOUNT_STATUS_DESC: Record<SubAccountStatus, string> = {
+  onboarding: 'Cliente nuevo que todavía no lanzó su primera campaña.',
+  adoption: 'Ya lanzó al menos una campaña con 30 minutos reales.',
+  success: 'Ya hizo al menos una recarga de minutos.',
+  renewal: 'Negociando la renovación de su contrato antes de continuar (no es churn risk).',
+  churn_risk: 'En riesgo de darse de baja o con señales de decrecimiento.',
+  churned: 'Ya no es cliente.',
+}
+
+export const AGENT_STAGE_DESC: Record<AgentStage, string> = {
+  backlog: 'Planeado, pero faltan definiciones esenciales para empezar a construirlo.',
+  nuevo: 'Esperando el kickoff para crear los tickets y que el IE arranque el desarrollo.',
+  en_construccion: 'El IE lo está construyendo.',
+  entregado_qa: 'QA está creando los casos de prueba (TC) y testeándolos.',
+  iterando_qa: 'QA reabrió tickets que hay que resolver antes de lanzar.',
+  listo_para_mostrar: 'En condiciones de ser probado por el cliente.',
+  en_produccion: 'Ya corrió carteras en producción con clientes reales.',
+  iterando_cliente: 'El cliente pidió cambios que impiden seguir corriendo.',
+}
+
 // ── Tags de agente (independientes entre sí) ─────────────────
 // is_live: el agente está en vivo. is_active: vigente vs dado de baja.
 
 export const AGENT_LIVE_BADGE = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
 export const AGENT_INACTIVE_BADGE = 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+
+export const AGENT_LIVE_DESC = 'Corriendo activamente campañas en producción con clientes reales.'
+export const AGENT_ACTIVE_DESC = 'Activo: corrió al menos una campaña en los últimos 90 días.'
+export const AGENT_INACTIVE_DESC = 'Baja: sin campañas en los últimos 90 días.'
 
 // ── Nombre derivado del agente ───────────────────────────────
 // Formato: {client.name}: {sub_account.name} - {tipo_de_mora} {country.name}

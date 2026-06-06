@@ -1,15 +1,14 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
+import { AgentStageBadge, ClientStatusBadge } from '@/components/StatusBadge'
 import { BackLink, Field, Section, people } from '@/components/detail-ui'
 import { getSubAccountDetail } from '@/lib/queries'
 import {
   AGENT_INACTIVE_BADGE,
+  AGENT_INACTIVE_DESC,
   AGENT_LIVE_BADGE,
-  AGENT_STAGE_BADGE,
-  AGENT_STAGE_LABELS,
-  SUB_ACCOUNT_STATUS_BADGE,
-  SUB_ACCOUNT_STATUS_LABELS,
+  AGENT_LIVE_DESC,
 } from '@/lib/display'
 
 export const dynamic = 'force-dynamic'
@@ -33,10 +32,7 @@ export default async function SubAccountDetailPage({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="text-lg font-semibold text-zinc-100">{sub.name}</h1>
-            <Badge
-              label={SUB_ACCOUNT_STATUS_LABELS[sub.status]}
-              className={SUB_ACCOUNT_STATUS_BADGE[sub.status]}
-            />
+            <ClientStatusBadge status={sub.status} />
           </div>
           <p className="mt-1 text-sm text-zinc-500">
             Organización:{' '}
@@ -97,12 +93,17 @@ export default async function SubAccountDetailPage({
                     {a.derivedName}
                   </Link>
                   <span className="flex shrink-0 items-center gap-2">
-                    {a.isLive && <Badge label="Live" className={AGENT_LIVE_BADGE} />}
-                    {!a.isActive && <Badge label="Baja" className={AGENT_INACTIVE_BADGE} />}
-                    <Badge
-                      label={AGENT_STAGE_LABELS[a.currentStage]}
-                      className={AGENT_STAGE_BADGE[a.currentStage]}
-                    />
+                    {a.isLive && (
+                      <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
+                    )}
+                    {!a.isActive && (
+                      <Badge
+                        label="Baja"
+                        className={AGENT_INACTIVE_BADGE}
+                        title={AGENT_INACTIVE_DESC}
+                      />
+                    )}
+                    <AgentStageBadge stage={a.currentStage} />
                     <Link
                       href={`/agents/${a.id}/edit`}
                       aria-label="Editar agente"

@@ -1,12 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Badge } from '@/components/Badge'
+import { ClientStatusBadge } from '@/components/StatusBadge'
 import { BackLink, Field, Section, people } from '@/components/detail-ui'
 import { getClientDetail } from '@/lib/queries'
-import {
-  SUB_ACCOUNT_STATUS_BADGE,
-  SUB_ACCOUNT_STATUS_LABELS,
-} from '@/lib/display'
 
 export const dynamic = 'force-dynamic'
 
@@ -88,10 +84,7 @@ export default async function ClientDetailPage({
                         {s.vendedor ? ` · vendió ${s.vendedor.name}` : ''}
                       </span>
                     </span>
-                    <Badge
-                      label={SUB_ACCOUNT_STATUS_LABELS[s.status]}
-                      className={SUB_ACCOUNT_STATUS_BADGE[s.status]}
-                    />
+                    <ClientStatusBadge status={s.status} />
                   </Link>
                 </li>
               ))}
