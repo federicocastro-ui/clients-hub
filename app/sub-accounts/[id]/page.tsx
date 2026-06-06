@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { AgentStageBadge, ClientStatusBadge } from '@/components/StatusBadge'
 import { Breadcrumb, Field, Section, people } from '@/components/detail-ui'
-import { BackButton } from '@/components/BackButton'
 import { NotesPanel } from '@/components/NotesPanel'
 import { getSubAccountDetail, getSubAccountNotes } from '@/lib/queries'
 import {
@@ -27,9 +26,7 @@ export default async function SubAccountDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <BackButton fallback="/" />
-        <span className="text-zinc-700">·</span>
+      <div className="mb-4">
         <Breadcrumb
           items={[
             { label: 'Hub', href: '/' },

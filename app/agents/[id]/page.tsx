@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { Breadcrumb, Field, Section } from '@/components/detail-ui'
-import { BackButton } from '@/components/BackButton'
 import { getAgentDetail, getAgentDocuments } from '@/lib/queries'
 import {
   addAgentFile_,
@@ -56,9 +55,7 @@ export default async function AgentDetailPage({
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <BackButton fallback="/" />
-        <span className="text-zinc-700">·</span>
+      <div className="mb-4">
         <Breadcrumb
           items={[
             { label: 'Hub', href: '/' },
