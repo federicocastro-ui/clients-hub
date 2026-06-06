@@ -31,6 +31,7 @@ export interface Database {
         Row: {
           id: string
           name: string
+          is_active: boolean
           created_at: string
         }
         Insert: Omit<Database['public']['Tables']['clients']['Row'], 'id' | 'created_at'> & {

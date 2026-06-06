@@ -9,6 +9,7 @@ import type {
   AgentRow,
   ClientDetail,
   FixedLink,
+  OrgAdminRow,
   PersonRef,
   StatusGroup,
   SubAccountDetail,
@@ -52,6 +53,7 @@ export interface RawSubAccount {
 export interface RawClient {
   id: string
   name: string
+  is_active: boolean
   created_at: string
   sub_accounts: RawSubAccount[]
 }
@@ -90,7 +92,7 @@ async function fetchRawClients(): Promise<RawClient[]> {
     .from('clients')
     .select(
       `
-      id, name, created_at,
+      id, name, is_active, created_at,
       sub_accounts (
         id, name, tier, status,
         vendedor:team_members!vendedor_id ( id, name ),
@@ -168,9 +170,12 @@ function buildSubAccountRow(
 export async function getClientHubData(): Promise<StatusGroup[]> {
   const rawClients = await fetchRawClients()
 
-  // Aplanamos: todas las sub cuentas de todos los clientes en una lista,
-  // cada una con su cliente como etiqueta.
-  const allSubAccounts: SubAccountRow[] = rawClients.flatMap((client) =>
+  // Aplanamos: todas las sub cuentas de las organizaciones ACTIVAS en una
+  // lista, cada una con su organización (client) como etiqueta. Las
+  // organizaciones desactivadas desde el panel admin se ocultan del hub.
+  const allSubAccounts: SubAccountRow[] = rawClients
+    .filter((client) => client.is_active)
+    .flatMap((client) =>
     client.sub_accounts.map((sa) =>
       buildSubAccountRow(sa, { id: client.id, name: client.name }),
     ),
@@ -194,6 +199,22 @@ export async function getClientHubData(): Promise<StatusGroup[]> {
 
 export function isUsingMockData(): boolean {
   return !supabaseConfigured()
+}
+
+// ── Panel de administración ──────────────────────────────────
+
+export async function getOrganizationsForAdmin(): Promise<OrgAdminRow[]> {
+  const rawClients = await fetchRawClients()
+  return rawClients
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      isActive: c.is_active,
+      createdAt: c.created_at,
+      subAccountCount: c.sub_accounts.length,
+      agentCount: c.sub_accounts.reduce((acc, s) => acc + s.agents.length, 0),
+    }))
+    .sort((a, b) => Number(b.isActive) - Number(a.isActive) || a.name.localeCompare(b.name))
 }
 
 // ── Datos de referencia (para formularios) ───────────────────

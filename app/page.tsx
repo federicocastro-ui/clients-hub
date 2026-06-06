@@ -18,12 +18,20 @@ export default async function Home() {
             Single Source of Truth de organizaciones, clientes y agentes de Kleva.
           </p>
         </div>
-        <Link
-          href="/clients/new"
-          className="shrink-0 rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
-        >
-          + Nueva organización
-        </Link>
+        <div className="flex shrink-0 items-center gap-2">
+          <Link
+            href="/admin"
+            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+          >
+            Admin
+          </Link>
+          <Link
+            href="/clients/new"
+            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
+          >
+            + Nueva organización
+          </Link>
+        </div>
       </header>
 
       {usingMock && (

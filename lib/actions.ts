@@ -84,7 +84,13 @@ export async function createClient_(fd: FormData) {
   let id: string
   if (usingMock()) {
     id = crypto.randomUUID()
-    MOCK_CLIENTS.push({ id, name, created_at: new Date().toISOString(), sub_accounts: [] })
+    MOCK_CLIENTS.push({
+      id,
+      name,
+      is_active: true,
+      created_at: new Date().toISOString(),
+      sub_accounts: [],
+    })
   } else {
     const { data, error } = await db().from('clients').insert({ name }).select('id').single()
     if (error) throw new Error(error.message)
@@ -92,6 +98,17 @@ export async function createClient_(fd: FormData) {
   }
   revalidateAll()
   redirect(`/clients/${id}`)
+}
+
+export async function setOrganizationActive_(id: string, active: boolean) {
+  if (usingMock()) {
+    const c = MOCK_CLIENTS.find((c) => c.id === id)
+    if (c) c.is_active = active
+  } else {
+    const { error } = await db().from('clients').update({ is_active: active }).eq('id', id)
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
 }
 
 export async function updateClient_(id: string, fd: FormData) {

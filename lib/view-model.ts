@@ -48,6 +48,16 @@ export interface StatusGroup {
   subAccounts: SubAccountRow[]
 }
 
+// Fila del panel de administración de organizaciones.
+export interface OrgAdminRow {
+  id: string
+  name: string
+  isActive: boolean
+  createdAt: string
+  subAccountCount: number
+  agentCount: number
+}
+
 // ── Modelos de las vistas de detalle ─────────────────────────
 
 import type { StageLog } from './stage-metrics'
