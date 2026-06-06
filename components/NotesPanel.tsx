@@ -50,16 +50,13 @@ export function NotesPanel({
           <ul className="flex flex-col gap-2">
             {notes.map((note) => (
               <li key={note.id} className="rounded-md border border-zinc-800 bg-zinc-950/40 p-3">
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <span className="text-xs text-zinc-500">
-                    {note.author ? (
-                      <span className="text-zinc-300">{note.author}</span>
-                    ) : (
-                      'Anónimo'
-                    )}
-                    {' · '}
-                    {fmtDateTime(note.createdAt)}
-                  </span>
+                <div className="mb-1.5 flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="text-sm font-medium text-zinc-100">
+                      {note.author ?? 'Anónimo'}
+                    </div>
+                    <div className="text-xs text-zinc-500">{fmtDateTime(note.createdAt)}</div>
+                  </div>
                   <form action={removeSubAccountNote_.bind(null, subAccountId, note.id)}>
                     <button
                       type="submit"
@@ -69,7 +66,7 @@ export function NotesPanel({
                     </button>
                   </form>
                 </div>
-                <p className="text-sm whitespace-pre-wrap text-zinc-200">{note.body}</p>
+                <p className="text-sm whitespace-pre-wrap text-zinc-300">{note.body}</p>
               </li>
             ))}
           </ul>

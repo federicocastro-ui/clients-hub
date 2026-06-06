@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Badge } from '@/components/Badge'
 import { AgentStageBadge, ClientStatusBadge } from '@/components/StatusBadge'
-import { BackLink, Field, Section, people } from '@/components/detail-ui'
+import { Field, Section, people } from '@/components/detail-ui'
+import { BackButton } from '@/components/BackButton'
 import { NotesPanel } from '@/components/NotesPanel'
 import { getSubAccountDetail, getSubAccountNotes } from '@/lib/queries'
 import {
@@ -27,7 +28,7 @@ export default async function SubAccountDetailPage({
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
       <div className="mb-4">
-        <BackLink href="/" label="Volver a la lista" />
+        <BackButton fallback="/" />
       </div>
 
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
