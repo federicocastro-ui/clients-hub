@@ -10,14 +10,30 @@ import {
   AGENT_INACTIVE_DESC,
   AGENT_LIVE_BADGE,
   AGENT_LIVE_DESC,
+  AGENT_STAGE_LABELS,
+  AGENT_STAGE_ORDER,
+  SUB_ACCOUNT_STATUS_LABELS,
+  SUB_ACCOUNT_STATUS_ORDER,
 } from '@/lib/display'
-import type { SubAccountStatus } from '@/lib/database.types'
+import type { AgentStage, SubAccountStatus } from '@/lib/database.types'
 import type {
   AgentRow,
   PersonRef,
   StatusGroup,
   SubAccountRow,
 } from '@/lib/view-model'
+
+type FilterKey = 'status' | 'stage' | 'onb' | 'cs' | 'ie' | 'tier'
+interface FilterOption {
+  value: string
+  label: string
+  count: number
+}
+interface FilterCategory {
+  key: FilterKey
+  label: string
+  options: FilterOption[]
+}
 
 function Chevron({ open }: { open: boolean }) {
   return (
@@ -92,46 +108,98 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
       return next
     })
 
-  // ── Filtros (operan sobre las asignaciones a nivel agente) ──
-  const [filters, setFilters] = useState({ onb: '', cs: '', ie: '', tier: '' })
-  const setFilter = (key: keyof typeof filters, value: string) =>
-    setFilters((prev) => ({ ...prev, [key]: value }))
-  const clearFilters = () => setFilters({ onb: '', cs: '', ie: '', tier: '' })
-  const anyFilter = Boolean(filters.onb || filters.cs || filters.ie || filters.tier)
+  // ── Filtros multi-select (estilo Linear, por categorías) ──
+  const emptyFilters = (): Record<FilterKey, Set<string>> => ({
+    status: new Set(),
+    stage: new Set(),
+    onb: new Set(),
+    cs: new Set(),
+    ie: new Set(),
+    tier: new Set(),
+  })
+  const [filters, setFilters] = useState<Record<FilterKey, Set<string>>>(emptyFilters)
+  const toggleValue = (key: FilterKey, value: string) =>
+    setFilters((prev) => {
+      const next = { ...prev, [key]: new Set(prev[key]) }
+      next[key].has(value) ? next[key].delete(value) : next[key].add(value)
+      return next
+    })
+  const clearFilters = () => setFilters(emptyFilters())
+  const activeCount = (Object.values(filters) as Set<string>[]).reduce((n, s) => n + s.size, 0)
 
-  // Opciones derivadas de los datos cargados.
-  const options = useMemo(() => {
+  // Categorías + opciones con contadores (sobre todos los datos).
+  const categories = useMemo<FilterCategory[]>(() => {
+    const subs = groups.flatMap((g) => g.subAccounts)
     const onb = new Map<string, string>()
     const cs = new Map<string, string>()
     const ie = new Map<string, string>()
     const tiers = new Set<number>()
-    for (const g of groups)
-      for (const sub of g.subAccounts) {
-        tiers.add(sub.tier)
-        for (const a of sub.agents) {
-          if (a.onb) onb.set(a.onb.id, a.onb.name)
-          if (a.cs) cs.set(a.cs.id, a.cs.name)
-          if (a.ie) ie.set(a.ie.id, a.ie.name)
-        }
+    for (const s of subs) {
+      tiers.add(s.tier)
+      for (const a of s.agents) {
+        if (a.onb) onb.set(a.onb.id, a.onb.name)
+        if (a.cs) cs.set(a.cs.id, a.cs.name)
+        if (a.ie) ie.set(a.ie.id, a.ie.name)
       }
-    const sortPeople = (m: Map<string, string>) =>
-      [...m.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name))
-    return {
-      onb: sortPeople(onb),
-      cs: sortPeople(cs),
-      ie: sortPeople(ie),
-      tiers: [...tiers].sort((a, b) => a - b),
     }
+    const personOpts = (m: Map<string, string>, role: 'onb' | 'cs' | 'ie'): FilterOption[] =>
+      [...m.entries()]
+        .map(([id, name]) => ({
+          value: id,
+          label: name,
+          count: subs.filter((s) => s.agents.some((a) => a[role]?.id === id)).length,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label))
+    return [
+      {
+        key: 'status',
+        label: 'Estado',
+        options: SUB_ACCOUNT_STATUS_ORDER.map((v) => ({
+          value: v,
+          label: SUB_ACCOUNT_STATUS_LABELS[v],
+          count: subs.filter((s) => s.status === v).length,
+        })).filter((o) => o.count > 0),
+      },
+      {
+        key: 'stage',
+        label: 'Etapa',
+        options: AGENT_STAGE_ORDER.map((v) => ({
+          value: v,
+          label: AGENT_STAGE_LABELS[v],
+          count: subs.filter((s) => s.agents.some((a) => a.currentStage === v)).length,
+        })).filter((o) => o.count > 0),
+      },
+      { key: 'onb', label: 'Onb', options: personOpts(onb, 'onb') },
+      { key: 'cs', label: 'CS', options: personOpts(cs, 'cs') },
+      { key: 'ie', label: 'IE', options: personOpts(ie, 'ie') },
+      {
+        key: 'tier',
+        label: 'Tier',
+        options: [...tiers]
+          .sort((a, b) => a - b)
+          .map((t) => ({
+            value: String(t),
+            label: `Tier ${t}`,
+            count: subs.filter((s) => s.tier === t).length,
+          })),
+      },
+    ]
   }, [groups])
 
-  // Una sub cuenta matchea si: tier coincide y algún agente tiene el Onb/CS/IE.
+  // Match: dentro de una categoría OR; entre categorías AND.
   const filteredGroups = useMemo(() => {
-    if (!anyFilter) return groups
+    if (activeCount === 0) return groups
     const match = (sub: SubAccountRow) => {
-      if (filters.tier && sub.tier !== Number(filters.tier)) return false
-      if (filters.onb && !sub.agents.some((a) => a.onb?.id === filters.onb)) return false
-      if (filters.cs && !sub.agents.some((a) => a.cs?.id === filters.cs)) return false
-      if (filters.ie && !sub.agents.some((a) => a.ie?.id === filters.ie)) return false
+      if (filters.status.size && !filters.status.has(sub.status)) return false
+      if (filters.tier.size && !filters.tier.has(String(sub.tier))) return false
+      if (filters.stage.size && !sub.agents.some((a) => filters.stage.has(a.currentStage)))
+        return false
+      if (filters.onb.size && !sub.agents.some((a) => a.onb && filters.onb.has(a.onb.id)))
+        return false
+      if (filters.cs.size && !sub.agents.some((a) => a.cs && filters.cs.has(a.cs.id)))
+        return false
+      if (filters.ie.size && !sub.agents.some((a) => a.ie && filters.ie.has(a.ie.id)))
+        return false
       return true
     }
     return groups
@@ -140,21 +208,21 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
         return { ...g, subAccounts, subAccountCount: subAccounts.length }
       })
       .filter((g) => g.subAccounts.length > 0)
-  }, [groups, filters, anyFilter])
+  }, [groups, filters, activeCount])
 
   return (
     <div className="flex flex-col gap-6">
       <FilterBar
-        options={options}
+        categories={categories}
         filters={filters}
-        setFilter={setFilter}
+        toggleValue={toggleValue}
         clearFilters={clearFilters}
-        anyFilter={anyFilter}
+        activeCount={activeCount}
       />
 
       {filteredGroups.length === 0 ? (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] p-8 text-center text-sm text-slate-500">
-          {anyFilter ? 'Ningún cliente coincide con los filtros.' : 'No hay clientes para mostrar.'}
+          {activeCount > 0 ? 'Ningún cliente coincide con los filtros.' : 'No hay clientes para mostrar.'}
         </div>
       ) : (
         filteredGroups.map((group) => {
@@ -214,84 +282,148 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
   )
 }
 
+function FunnelIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="M2 3h12l-4.5 5.5V13L6.5 11V8.5L2 3z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function OptionLabel({ catKey, option }: { catKey: FilterKey; option: FilterOption }) {
+  if (catKey === 'status') return <ClientStatusBadge status={option.value as SubAccountStatus} />
+  if (catKey === 'stage') return <AgentStageBadge stage={option.value as AgentStage} />
+  return <span className="truncate text-slate-700">{option.label}</span>
+}
+
 function FilterBar({
-  options,
+  categories,
   filters,
-  setFilter,
+  toggleValue,
   clearFilters,
-  anyFilter,
+  activeCount,
 }: {
-  options: {
-    onb: PersonRef[]
-    cs: PersonRef[]
-    ie: PersonRef[]
-    tiers: number[]
-  }
-  filters: { onb: string; cs: string; ie: string; tier: string }
-  setFilter: (key: 'onb' | 'cs' | 'ie' | 'tier', value: string) => void
+  categories: FilterCategory[]
+  filters: Record<FilterKey, Set<string>>
+  toggleValue: (key: FilterKey, value: string) => void
   clearFilters: () => void
-  anyFilter: boolean
+  activeCount: number
 }) {
-  const selectCls =
-    'rounded-xl border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-800 outline-none focus:border-accent'
+  const [open, setOpen] = useState(false)
+  const [cat, setCat] = useState<FilterKey | null>(null)
+  const current = categories.find((c) => c.key === cat) ?? null
+  const close = () => {
+    setOpen(false)
+    setCat(null)
+  }
+
+  // Chips de filtros activos.
+  const chips = categories.flatMap((c) =>
+    c.options.filter((o) => filters[c.key].has(o.value)).map((o) => ({ key: c.key, ...o })),
+  )
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
-        Filtros
-      </span>
-      <select
-        value={filters.onb}
-        onChange={(e) => setFilter('onb', e.target.value)}
-        className={selectCls}
-        aria-label="Filtrar por Onb"
-      >
-        <option value="">Onb: todos</option>
-        {options.onb.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-          </option>
-        ))}
-      </select>
-      <select
-        value={filters.cs}
-        onChange={(e) => setFilter('cs', e.target.value)}
-        className={selectCls}
-        aria-label="Filtrar por CS"
-      >
-        <option value="">CS: todos</option>
-        {options.cs.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-          </option>
-        ))}
-      </select>
-      <select
-        value={filters.ie}
-        onChange={(e) => setFilter('ie', e.target.value)}
-        className={selectCls}
-        aria-label="Filtrar por IE"
-      >
-        <option value="">IE: todos</option>
-        {options.ie.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.name}
-          </option>
-        ))}
-      </select>
-      <select
-        value={filters.tier}
-        onChange={(e) => setFilter('tier', e.target.value)}
-        className={selectCls}
-        aria-label="Filtrar por Tier"
-      >
-        <option value="">Tier: todos</option>
-        {options.tiers.map((t) => (
-          <option key={t} value={t}>
-            T{t}
-          </option>
-        ))}
-      </select>
-      {anyFilter && (
+      <div className="relative">
+        <button
+          onClick={() => setOpen((o) => !o)}
+          className="inline-flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-50"
+        >
+          <FunnelIcon />
+          Filtros
+          {activeCount > 0 && (
+            <span className="rounded-md bg-accent px-1.5 text-xs font-medium text-white">
+              {activeCount}
+            </span>
+          )}
+        </button>
+
+        {open && (
+          <>
+            <div className="fixed inset-0 z-10" onClick={close} />
+            <div className="absolute left-0 z-20 mt-1.5 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_12px_36px_rgba(15,23,42,0.14)]">
+              {!current ? (
+                <ul className="py-1">
+                  {categories.map((c) => (
+                    <li key={c.key}>
+                      <button
+                        onClick={() => setCat(c.key)}
+                        className="flex w-full items-center justify-between gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50"
+                      >
+                        <span>{c.label}</span>
+                        <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                          {filters[c.key].size > 0 && (
+                            <span className="font-medium text-accent">{filters[c.key].size}</span>
+                          )}
+                          <Chevron open={false} />
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div>
+                  <button
+                    onClick={() => setCat(null)}
+                    className="flex w-full items-center gap-1 border-b border-slate-200 px-3 py-2 text-xs font-medium text-slate-500 hover:text-slate-800"
+                  >
+                    <span aria-hidden>←</span> {current.label}
+                  </button>
+                  <ul className="max-h-72 overflow-auto py-1">
+                    {current.options.map((o) => {
+                      const checked = filters[current.key].has(o.value)
+                      return (
+                        <li key={o.value}>
+                          <button
+                            onClick={() => toggleValue(current.key, o.value)}
+                            className="flex w-full items-center gap-2 px-3 py-1.5 text-sm hover:bg-slate-50"
+                          >
+                            <span
+                              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                                checked
+                                  ? 'border-accent bg-accent text-white'
+                                  : 'border-slate-300 text-transparent'
+                              }`}
+                            >
+                              <CheckIcon />
+                            </span>
+                            <span className="flex min-w-0 flex-1 items-center">
+                              <OptionLabel catKey={current.key} option={o} />
+                            </span>
+                            <span className="text-xs text-slate-400">{o.count}</span>
+                          </button>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      {chips.map((ch) => (
+        <button
+          key={`${ch.key}:${ch.value}`}
+          onClick={() => toggleValue(ch.key, ch.value)}
+          className="inline-flex items-center gap-1 rounded-xl border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-700 hover:bg-slate-100"
+          title="Quitar filtro"
+        >
+          {ch.label}
+          <span className="text-slate-400">✕</span>
+        </button>
+      ))}
+
+      {activeCount > 0 && (
         <button
           onClick={clearFilters}
           className="rounded-xl px-2 py-1 text-xs text-slate-500 hover:text-slate-900"
@@ -315,8 +447,8 @@ function SubAccountBlock({
   onToggle: () => void
 }) {
   const even = index % 2 === 0
-  const headerBg = even ? 'bg-slate-50' : 'bg-slate-50'
-  const agentsBg = even ? 'bg-slate-50' : 'bg-slate-50'
+  const headerBg = even ? 'bg-white' : 'bg-slate-50'
+  const agentsBg = even ? 'bg-slate-50' : 'bg-white'
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200">

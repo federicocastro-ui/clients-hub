@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ClientHubList } from '@/components/ClientHubList'
+import { LogoMark } from '@/components/Logo'
 import { getClientHubData, isUsingMockData } from '@/lib/queries'
 
 // Herramienta interna de datos: siempre fresca, sin cache.
@@ -13,8 +14,11 @@ export default async function Home() {
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
       <header className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold text-slate-900">Client Hub</h1>
-          <p className="text-sm text-slate-500">
+          <div className="flex items-center gap-2.5">
+            <LogoMark />
+            <h1 className="text-lg font-semibold text-slate-900">Client Hub</h1>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">
             Single Source of Truth de organizaciones, clientes y agentes de Kleva.
           </p>
         </div>
