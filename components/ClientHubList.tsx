@@ -153,7 +153,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
     return [
       {
         key: 'status',
-        label: 'Estado',
+        label: 'Estado (cliente)',
         options: SUB_ACCOUNT_STATUS_ORDER.map((v) => ({
           value: v,
           label: SUB_ACCOUNT_STATUS_LABELS[v],
@@ -162,7 +162,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
       },
       {
         key: 'stage',
-        label: 'Etapa',
+        label: 'Etapa (agente)',
         options: AGENT_STAGE_ORDER.map((v) => ({
           value: v,
           label: AGENT_STAGE_LABELS[v],
