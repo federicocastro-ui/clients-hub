@@ -26,8 +26,8 @@ export default async function NewAgentPage({
       <div className="mb-4">
         <BackLink href={`/sub-accounts/${subAccountId}`} label={`Volver a ${sub.name}`} />
       </div>
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Nuevo agente</h1>
-      <p className="mb-5 text-sm text-zinc-500">
+      <h1 className="mb-1 text-lg font-semibold text-slate-900">Nuevo agente</h1>
+      <p className="mb-5 text-sm text-slate-500">
         {sub.clientName}: {sub.name} — el nombre del agente se genera solo.
       </p>
 

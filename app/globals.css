@@ -1,12 +1,24 @@
 @import "tailwindcss";
 
-/* Tema oscuro de marca (Kleva): fintech sobrio, fondo oscuro con glow blur. */
+/* ─────────────────────────────────────────────────────────────
+   Identidad visual Kleva — SaaS B2B moderno, premium, claro.
+   Inspiración: Stripe / Linear / Vercel / Ramp / OpenAI.
+   ───────────────────────────────────────────────────────────── */
 :root {
-  --background: #0a0b0e;
-  --foreground: #fafafa;
-  /* Acento de marca Kleva (azul). Ajustable a su hex exacto cuando se confirme. */
-  --accent: #2e6bff;
-  --accent-hover: #1d5cf0;
+  --background: #ffffff;
+  --foreground: #0f172a; /* slate-900 */
+
+  /* Marca */
+  --brand-blue: #2563eb;
+  --brand-indigo: #4f46e5;
+  --brand-violet: #7c3aed;
+  --brand-cyan: #06b6d4;
+
+  /* Acento (botones primarios, foco, links activos) */
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+
+  --brand-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #7c3aed 100%);
 }
 
 @theme inline {
@@ -14,21 +26,39 @@
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
   --color-accent-hover: var(--accent-hover);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
-  /* Glow azul con blur arriba (cue de marca) sobre base oscura. */
+  /* Glow índigo muy sutil arriba sobre fondo blanco (glassmorphism ligero). */
   background:
-    radial-gradient(55rem 28rem at 50% -14rem, rgba(46, 107, 255, 0.14), transparent 70%),
+    radial-gradient(60rem 32rem at 50% -18rem, rgba(79, 70, 229, 0.07), transparent 70%),
     var(--background);
   background-attachment: fixed;
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
 }
 
-/* Color de selección con el acento. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.03em;
+}
+
 ::selection {
-  background: rgba(46, 107, 255, 0.3);
+  background: rgba(79, 70, 229, 0.18);
+}
+
+/* Utilidad: degradado de marca para textos/acciones destacadas. */
+.brand-gradient {
+  background-image: var(--brand-gradient);
+}
+.brand-gradient-text {
+  background-image: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }

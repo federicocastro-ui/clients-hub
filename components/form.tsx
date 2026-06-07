@@ -5,7 +5,7 @@ import type { ReactNode } from 'react'
 import { useFormStatus } from 'react-dom'
 
 export const inputCls =
-  'w-full rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-accent'
+  'w-full rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 outline-none transition focus:border-[#4f46e5] focus:shadow-[0_0_0_4px_rgba(79,70,229,0.15)]'
 
 export function FieldLabel({
   label,
@@ -18,11 +18,11 @@ export function FieldLabel({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+      <span className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
         {label}
       </span>
       {children}
-      {hint && <span className="text-xs text-zinc-500">{hint}</span>}
+      {hint && <span className="text-xs text-slate-500">{hint}</span>}
     </label>
   )
 }
@@ -33,7 +33,7 @@ export function SubmitButton({ label = 'Guardar' }: { label?: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex items-center rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover disabled:opacity-60"
+      className="inline-flex items-center rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)] disabled:opacity-60"
     >
       {pending ? 'Guardando…' : label}
     </button>
@@ -44,7 +44,7 @@ export function CancelLink({ href }: { href: string }) {
   return (
     <Link
       href={href}
-      className="inline-flex items-center rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800"
+      className="inline-flex items-center rounded-xl border border-slate-300 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-100"
     >
       Cancelar
     </Link>

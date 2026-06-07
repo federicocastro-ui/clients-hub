@@ -39,14 +39,14 @@ export default async function SubAccountDetailPage({
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="text-lg font-semibold text-zinc-100">{sub.name}</h1>
+            <h1 className="text-lg font-semibold text-slate-900">{sub.name}</h1>
             <ClientStatusBadge status={sub.status} />
           </div>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="mt-1 text-sm text-slate-500">
             Organización:{' '}
             <Link
               href={`/clients/${sub.clientId}`}
-              className="text-zinc-300 hover:text-white hover:underline"
+              className="text-slate-700 hover:text-slate-900 hover:underline"
             >
               {sub.clientName}
             </Link>
@@ -54,7 +54,7 @@ export default async function SubAccountDetailPage({
         </div>
         <Link
           href={`/sub-accounts/${sub.id}/edit`}
-          className="shrink-0 rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+          className="shrink-0 rounded-xl border border-slate-300 px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-100"
         >
           Editar
         </Link>
@@ -80,24 +80,24 @@ export default async function SubAccountDetailPage({
               href={`/agents/new?subAccountId=${sub.id}`}
               aria-label="Nuevo agente"
               title="Nuevo agente"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-accent text-white hover:bg-accent-hover"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-accent text-white hover:bg-accent-hover"
             >
               <PlusIcon />
             </Link>
           }
         >
           {sub.agents.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin agentes.</p>
+            <p className="text-sm text-slate-500">Sin agentes.</p>
           ) : (
-            <ul className="flex flex-col divide-y divide-zinc-800/60">
+            <ul className="flex flex-col divide-y divide-slate-200">
               {sub.agents.map((a) => (
                 <li
                   key={a.id}
-                  className="flex items-center justify-between gap-3 py-2 hover:bg-zinc-800/20"
+                  className="flex items-center justify-between gap-3 py-2 hover:bg-white"
                 >
                   <Link
                     href={`/agents/${a.id}`}
-                    className="truncate text-sm font-medium text-zinc-200 hover:text-white hover:underline"
+                    className="truncate text-sm font-medium text-slate-800 hover:text-slate-900 hover:underline"
                   >
                     {a.derivedName}
                   </Link>
@@ -117,7 +117,7 @@ export default async function SubAccountDetailPage({
                       href={`/agents/${a.id}/edit`}
                       aria-label="Editar agente"
                       title="Editar agente"
-                      className="inline-flex h-6 w-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-700/50 hover:text-zinc-100"
+                      className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                     >
                       <PencilIcon />
                     </Link>

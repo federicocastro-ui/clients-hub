@@ -152,11 +152,11 @@ export function AgentFormFields({
       </div>
 
       <div className="flex gap-6">
-        <label className="flex items-center gap-2 text-sm text-zinc-300">
+        <label className="flex items-center gap-2 text-sm text-slate-700">
           <input type="checkbox" name="is_live" defaultChecked={defaults?.isLive ?? false} />
           En vivo (live)
         </label>
-        <label className="flex items-center gap-2 text-sm text-zinc-300">
+        <label className="flex items-center gap-2 text-sm text-slate-700">
           <input
             type="checkbox"
             name="is_active"

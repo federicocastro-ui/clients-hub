@@ -22,11 +22,11 @@ export default async function ManageOrgPage({
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6">
       <div className="mb-4 flex items-center gap-3">
         <BackLink href="/admin" label="Volver al admin" />
-        <span className="text-zinc-700">·</span>
+        <span className="text-slate-300">·</span>
         <BackLink href={`/clients/${id}`} label="Ver organización" />
       </div>
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Gestionar {org.name}</h1>
-      <p className="mb-5 text-sm text-zinc-500">
+      <h1 className="mb-1 text-lg font-semibold text-slate-900">Gestionar {org.name}</h1>
+      <p className="mb-5 text-sm text-slate-500">
         Editá la organización, sus clientes y agentes. Cada bloque se guarda por separado.
       </p>
 

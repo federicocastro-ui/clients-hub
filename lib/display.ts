@@ -70,23 +70,23 @@ export const STAGE_TEAM_MAP: Record<AgentStage, Team[]> = {
 // ── Clases de color para badges (Tailwind, literales completos) ─
 
 export const AGENT_STAGE_BADGE: Record<AgentStage, string> = {
-  backlog: 'bg-slate-500/15 text-slate-300 border-slate-500/30',
-  nuevo: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-  en_construccion: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  entregado_qa: 'bg-violet-500/15 text-violet-300 border-violet-500/30',
-  iterando_qa: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
-  listo_para_mostrar: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-  en_produccion: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  iterando_cliente: 'bg-fuchsia-500/15 text-fuchsia-300 border-fuchsia-500/30',
+  backlog: 'bg-slate-100 text-slate-600 border-slate-200',
+  nuevo: 'bg-blue-50 text-blue-700 border-blue-200',
+  en_construccion: 'bg-amber-50 text-amber-700 border-amber-200',
+  entregado_qa: 'bg-violet-50 text-violet-700 border-violet-200',
+  iterando_qa: 'bg-orange-50 text-orange-700 border-orange-200',
+  listo_para_mostrar: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  en_produccion: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  iterando_cliente: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200',
 }
 
 export const SUB_ACCOUNT_STATUS_BADGE: Record<SubAccountStatus, string> = {
-  onboarding: 'bg-blue-500/15 text-blue-300 border-blue-500/30',
-  adoption: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30',
-  success: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-  renewal: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
-  churn_risk: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
-  churned: 'bg-rose-500/15 text-rose-300 border-rose-500/30',
+  onboarding: 'bg-blue-50 text-blue-700 border-blue-200',
+  adoption: 'bg-cyan-50 text-cyan-700 border-cyan-200',
+  success: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+  renewal: 'bg-amber-50 text-amber-700 border-amber-200',
+  churn_risk: 'bg-orange-50 text-orange-700 border-orange-200',
+  churned: 'bg-rose-50 text-rose-700 border-rose-200',
 }
 
 // ── Descripciones (tooltips) ─────────────────────────────────
@@ -114,8 +114,8 @@ export const AGENT_STAGE_DESC: Record<AgentStage, string> = {
 // ── Tags de agente (independientes entre sí) ─────────────────
 // is_live: el agente está en vivo. is_active: vigente vs dado de baja.
 
-export const AGENT_LIVE_BADGE = 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
-export const AGENT_INACTIVE_BADGE = 'bg-rose-500/15 text-rose-300 border-rose-500/30'
+export const AGENT_LIVE_BADGE = 'bg-emerald-50 text-emerald-700 border-emerald-200'
+export const AGENT_INACTIVE_BADGE = 'bg-rose-50 text-rose-700 border-rose-200'
 
 export const AGENT_LIVE_DESC = 'Corriendo activamente campañas en producción con clientes reales.'
 export const AGENT_ACTIVE_DESC = 'Activo: corrió al menos una campaña en los últimos 90 días.'

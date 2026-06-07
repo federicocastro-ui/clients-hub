@@ -14,15 +14,15 @@ export function Stepper({ current }: { current: WizardStep }) {
         <li key={s.key} className="flex items-center gap-2">
           <span
             className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium ${
-              i <= idx ? 'bg-accent text-white' : 'bg-zinc-800 text-zinc-400'
+              i <= idx ? 'bg-accent text-white' : 'bg-slate-100 text-slate-500'
             }`}
           >
             {i + 1}
           </span>
-          <span className={i === idx ? 'font-medium text-zinc-100' : 'text-zinc-500'}>
+          <span className={i === idx ? 'font-medium text-slate-900' : 'text-slate-500'}>
             {s.label}
           </span>
-          {i < STEPS.length - 1 && <span className="mx-1 h-px w-6 bg-zinc-700" />}
+          {i < STEPS.length - 1 && <span className="mx-1 h-px w-6 bg-slate-100" />}
         </li>
       ))}
     </ol>

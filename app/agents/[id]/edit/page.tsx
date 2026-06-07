@@ -27,8 +27,8 @@ export default async function EditAgentPage({
       <div className="mb-4">
         <BackLink href={`/agents/${id}`} label="Volver al agente" />
       </div>
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Editar agente</h1>
-      <p className="mb-5 text-sm text-zinc-500">
+      <h1 className="mb-1 text-lg font-semibold text-slate-900">Editar agente</h1>
+      <p className="mb-5 text-sm text-slate-500">
         La etapa se cambia desde el detalle (registra un log).
       </p>
 

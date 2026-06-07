@@ -68,7 +68,7 @@ export default async function AgentDetailPage({
 
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-100">{agent.derivedName}</h1>
+          <h1 className="text-lg font-semibold text-slate-900">{agent.derivedName}</h1>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <AgentStageBadge stage={agent.currentStage} />
             {agent.isLive && (
@@ -81,7 +81,7 @@ export default async function AgentDetailPage({
         </div>
         <Link
           href={`/agents/${agent.id}/edit`}
-          className="shrink-0 rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+          className="shrink-0 rounded-xl border border-slate-300 px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-100"
         >
           Editar
         </Link>
@@ -90,16 +90,16 @@ export default async function AgentDetailPage({
       {/* Cambiar etapa (dispara un log) */}
       <form
         action={changeAgentStage_.bind(null, agent.id)}
-        className="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-zinc-800 bg-zinc-900/40 p-3"
+        className="mb-4 flex flex-wrap items-end gap-2 rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] p-3"
       >
         <label className="flex flex-col gap-1">
-          <span className="text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+          <span className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
             Cambiar etapa
           </span>
           <select
             name="current_stage"
             defaultValue={agent.currentStage}
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-2.5 py-1.5 text-sm text-zinc-100 outline-none focus:border-zinc-500"
+            className="rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 outline-none focus:border-slate-300"
           >
             {AGENT_STAGE_ORDER.map((s) => (
               <option key={s} value={s}>
@@ -110,7 +110,7 @@ export default async function AgentDetailPage({
         </label>
         <button
           type="submit"
-          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
+          className="rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)]"
         >
           Aplicar
         </button>
@@ -123,7 +123,7 @@ export default async function AgentDetailPage({
             <Field label="Organización">
               <Link
                 href={`/clients/${agent.clientId}`}
-                className="text-zinc-200 hover:text-white hover:underline"
+                className="text-slate-800 hover:text-slate-900 hover:underline"
               >
                 {agent.clientName}
               </Link>
@@ -131,7 +131,7 @@ export default async function AgentDetailPage({
             <Field label="Cliente">
               <Link
                 href={`/sub-accounts/${agent.subAccountId}`}
-                className="text-zinc-200 hover:text-white hover:underline"
+                className="text-slate-800 hover:text-slate-900 hover:underline"
               >
                 {agent.subAccountName}
               </Link>
@@ -147,7 +147,7 @@ export default async function AgentDetailPage({
         {/* Links fijos */}
         <Section title="Links">
           {agent.links.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin links cargados.</p>
+            <p className="text-sm text-slate-500">Sin links cargados.</p>
           ) : (
             <div className="flex flex-wrap gap-2">
               {agent.links.map((link) => (
@@ -156,9 +156,9 @@ export default async function AgentDetailPage({
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800/40 px-2.5 py-1 text-xs text-zinc-200 hover:border-zinc-600 hover:bg-zinc-800"
+                  className="inline-flex items-center gap-1 rounded-xl border border-slate-300 bg-slate-50 px-2.5 py-1 text-xs text-slate-800 hover:border-slate-300 hover:bg-slate-100"
                 >
-                  {link.label} <span aria-hidden className="text-zinc-500">↗</span>
+                  {link.label} <span aria-hidden className="text-slate-500">↗</span>
                 </a>
               ))}
             </div>
@@ -171,13 +171,13 @@ export default async function AgentDetailPage({
           note="Links sueltos y archivos adjuntos, además de los 5 links fijos."
         >
           {documents.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin documentos.</p>
+            <p className="text-sm text-slate-500">Sin documentos.</p>
           ) : (
-            <ul className="mb-4 flex flex-col divide-y divide-zinc-800/60">
+            <ul className="mb-4 flex flex-col divide-y divide-slate-200">
               {documents.map((doc) => (
                 <li key={doc.id} className="flex items-center justify-between gap-3 py-2">
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="rounded border border-zinc-700 px-1.5 py-0.5 text-[10px] tracking-wide text-zinc-400 uppercase">
+                    <span className="rounded border border-slate-300 px-1.5 py-0.5 text-[10px] tracking-wide text-slate-500 uppercase">
                       {doc.kind === 'file' ? 'Archivo' : 'Link'}
                     </span>
                     <a
@@ -185,7 +185,7 @@ export default async function AgentDetailPage({
                       target={doc.kind === 'link' ? '_blank' : undefined}
                       rel="noopener noreferrer"
                       download={doc.kind === 'file' ? doc.label : undefined}
-                      className="truncate text-sm text-zinc-200 hover:text-white hover:underline"
+                      className="truncate text-sm text-slate-800 hover:text-slate-900 hover:underline"
                     >
                       {doc.label}
                     </a>
@@ -193,7 +193,7 @@ export default async function AgentDetailPage({
                   <form action={removeAgentDocument_.bind(null, agent.id, doc.id)}>
                     <button
                       type="submit"
-                      className="shrink-0 rounded-md border border-zinc-700 px-2 py-1 text-xs text-zinc-400 hover:border-rose-500/40 hover:text-rose-300"
+                      className="shrink-0 rounded-xl border border-slate-300 px-2 py-1 text-xs text-slate-500 hover:border-rose-300 hover:text-rose-600"
                     >
                       Quitar
                     </button>
@@ -203,13 +203,13 @@ export default async function AgentDetailPage({
             </ul>
           )}
 
-          <div className="grid gap-4 border-t border-zinc-800 pt-4 sm:grid-cols-2">
+          <div className="grid gap-4 border-t border-slate-200 pt-4 sm:grid-cols-2">
             {/* Agregar link */}
             <form
               action={addAgentLink_.bind(null, agent.id)}
               className="flex flex-col gap-2"
             >
-              <p className="text-xs font-medium text-zinc-400">Agregar link</p>
+              <p className="text-xs font-medium text-slate-500">Agregar link</p>
               <FieldLabel label="Label">
                 <input name="label" required className={inputCls} />
               </FieldLabel>
@@ -227,7 +227,7 @@ export default async function AgentDetailPage({
               encType="multipart/form-data"
               className="flex flex-col gap-2"
             >
-              <p className="text-xs font-medium text-zinc-400">Subir archivo</p>
+              <p className="text-xs font-medium text-slate-500">Subir archivo</p>
               <FieldLabel label="Label" hint="Opcional; por defecto usa el nombre del archivo.">
                 <input name="label" className={inputCls} />
               </FieldLabel>
@@ -236,7 +236,7 @@ export default async function AgentDetailPage({
                   name="file"
                   type="file"
                   required
-                  className="text-sm text-zinc-300 file:mr-2 file:rounded-md file:border-0 file:bg-zinc-700 file:px-2 file:py-1 file:text-zinc-100"
+                  className="text-sm text-slate-700 file:mr-2 file:rounded-xl file:border-0 file:bg-slate-100 file:px-2 file:py-1 file:text-slate-900"
                 />
               </FieldLabel>
               <div>
@@ -253,7 +253,7 @@ export default async function AgentDetailPage({
               {stages.map((s) => (
                 <div key={s.stage} className="flex items-center justify-between gap-2">
                   <AgentStageBadge stage={s.stage} />
-                  <span className="text-sm text-zinc-300">{formatDuration(s.totalMs)}</span>
+                  <span className="text-sm text-slate-700">{formatDuration(s.totalMs)}</span>
                 </div>
               ))}
             </div>
@@ -266,8 +266,8 @@ export default async function AgentDetailPage({
             <div className="flex flex-col gap-1.5">
               {teams.map((t) => (
                 <div key={t.team} className="flex items-center justify-between gap-2">
-                  <span className="text-sm text-zinc-200">{t.team}</span>
-                  <span className="text-sm text-zinc-300">{formatDuration(t.totalMs)}</span>
+                  <span className="text-sm text-slate-800">{t.team}</span>
+                  <span className="text-sm text-slate-700">{formatDuration(t.totalMs)}</span>
                 </div>
               ))}
             </div>
@@ -281,19 +281,19 @@ export default async function AgentDetailPage({
               <li key={i} className="flex items-start gap-3">
                 <div className="mt-1 flex flex-col items-center">
                   <span
-                    className={`h-2 w-2 rounded-full ${e.isCurrent ? 'bg-emerald-400' : 'bg-zinc-600'}`}
+                    className={`h-2 w-2 rounded-full ${e.isCurrent ? 'bg-emerald-400' : 'bg-slate-300'}`}
                   />
-                  {i < timeline.length - 1 && <span className="mt-1 h-6 w-px bg-zinc-700" />}
+                  {i < timeline.length - 1 && <span className="mt-1 h-6 w-px bg-slate-200" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <AgentStageBadge stage={e.toStage} />
-                    <span className="text-xs text-zinc-500">{fmtDate(e.changedAt)}</span>
+                    <span className="text-xs text-slate-500">{fmtDate(e.changedAt)}</span>
                     {e.isCurrent && (
-                      <span className="text-xs text-emerald-400">etapa actual</span>
+                      <span className="text-xs text-emerald-600">etapa actual</span>
                     )}
                   </div>
-                  <div className="mt-0.5 text-xs text-zinc-500">
+                  <div className="mt-0.5 text-xs text-slate-500">
                     {formatDuration(e.durationMs)} en esta etapa
                   </div>
                 </div>

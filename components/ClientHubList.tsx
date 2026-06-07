@@ -23,7 +23,7 @@ function Chevron({ open }: { open: boolean }) {
   return (
     <svg
       viewBox="0 0 16 16"
-      className={`h-3.5 w-3.5 shrink-0 text-zinc-500 transition-transform ${open ? 'rotate-90' : ''}`}
+      className={`h-3.5 w-3.5 shrink-0 text-slate-500 transition-transform ${open ? 'rotate-90' : ''}`}
       fill="none"
       stroke="currentColor"
       strokeWidth="1.75"
@@ -46,7 +46,7 @@ function EyeLink({ href, label }: { href: string; label: string }) {
       onClick={(e) => e.stopPropagation()}
       title={label}
       aria-label={label}
-      className="inline-flex h-6 w-6 items-center justify-center rounded text-zinc-500 hover:bg-zinc-700/50 hover:text-zinc-100"
+      className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900"
     >
       <svg
         viewBox="0 0 16 16"
@@ -153,7 +153,7 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
       />
 
       {filteredGroups.length === 0 ? (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-8 text-center text-sm text-zinc-400">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] p-8 text-center text-sm text-slate-500">
           {anyFilter ? 'Ningún cliente coincide con los filtros.' : 'No hay clientes para mostrar.'}
         </div>
       ) : (
@@ -168,17 +168,17 @@ export function ClientHubList({ groups }: { groups: StatusGroup[] }) {
             >
               <Chevron open={statusOpen} />
               <ClientStatusBadge status={group.status} />
-              <span className="text-xs text-zinc-500">
+              <span className="text-xs text-slate-500">
                 {group.subAccountCount}{' '}
                 {group.subAccountCount === 1 ? 'cliente' : 'clientes'}
               </span>
             </button>
 
             {statusOpen && (
-              <div className="overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/40">
+              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
                 {/* Encabezado de columnas */}
                 <div
-                  className={`${SUB_GRID} border-b border-zinc-800/60 bg-zinc-900/60 px-3 py-1.5 text-[11px] font-medium tracking-wide text-zinc-500 uppercase`}
+                  className={`${SUB_GRID} border-b border-slate-200 bg-slate-50 px-3 py-1.5 text-[11px] font-medium tracking-wide text-slate-500 uppercase`}
                 >
                   <span />
                   <span>Organización</span>
@@ -233,10 +233,10 @@ function FilterBar({
   anyFilter: boolean
 }) {
   const selectCls =
-    'rounded-md border border-zinc-800 bg-zinc-900/60 px-2 py-1 text-xs text-zinc-200 outline-none focus:border-accent'
+    'rounded-xl border border-slate-200 bg-slate-50 px-2 py-1 text-xs text-slate-800 outline-none focus:border-accent'
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <span className="text-[11px] font-medium tracking-wide text-zinc-500 uppercase">
+      <span className="text-[11px] font-medium tracking-wide text-slate-500 uppercase">
         Filtros
       </span>
       <select
@@ -294,7 +294,7 @@ function FilterBar({
       {anyFilter && (
         <button
           onClick={clearFilters}
-          className="rounded-md px-2 py-1 text-xs text-zinc-400 hover:text-zinc-100"
+          className="rounded-xl px-2 py-1 text-xs text-slate-500 hover:text-slate-900"
         >
           Limpiar
         </button>
@@ -315,11 +315,11 @@ function SubAccountBlock({
   onToggle: () => void
 }) {
   const even = index % 2 === 0
-  const headerBg = even ? 'bg-zinc-800/30' : 'bg-zinc-900/70'
-  const agentsBg = even ? 'bg-zinc-950/50' : 'bg-black/50'
+  const headerBg = even ? 'bg-slate-50' : 'bg-slate-50'
+  const agentsBg = even ? 'bg-slate-50' : 'bg-slate-50'
 
   return (
-    <div className="overflow-hidden rounded-md border border-zinc-800">
+    <div className="overflow-hidden rounded-xl border border-slate-200">
       {/* Fila clickeable (toggle). Cliente y Sub cuenta son links a su
           detalle (stopPropagation para no togglear al navegar). */}
       <div
@@ -332,32 +332,32 @@ function SubAccountBlock({
             onToggle()
           }
         }}
-        className={`${SUB_GRID} w-full cursor-pointer px-3 py-2 text-left text-sm ${headerBg} hover:bg-zinc-700/30`}
+        className={`${SUB_GRID} w-full cursor-pointer px-3 py-2 text-left text-sm ${headerBg} hover:bg-slate-100`}
       >
         <Chevron open={open} />
         <Link
           href={`/clients/${sub.clientId}`}
           onClick={(e) => e.stopPropagation()}
-          className="truncate text-zinc-400 hover:text-zinc-200 hover:underline"
+          className="truncate text-slate-500 hover:text-slate-800 hover:underline"
           title={sub.clientName}
         >
           {sub.clientName}
         </Link>
-        <span className="truncate font-medium text-zinc-100" title={sub.name}>
+        <span className="truncate font-medium text-slate-900" title={sub.name}>
           {sub.name}
         </span>
-        <span className="text-zinc-400">T{sub.tier}</span>
-        <span className="text-zinc-400">{sub.agentCount}</span>
-        <span className="truncate text-zinc-300" title={sub.vendedor?.name ?? '—'}>
+        <span className="text-slate-500">T{sub.tier}</span>
+        <span className="text-slate-500">{sub.agentCount}</span>
+        <span className="truncate text-slate-700" title={sub.vendedor?.name ?? '—'}>
           {sub.vendedor?.name ?? '—'}
         </span>
-        <span className="truncate text-zinc-300" title={people(sub.onbSet)}>
+        <span className="truncate text-slate-700" title={people(sub.onbSet)}>
           {people(sub.onbSet)}
         </span>
-        <span className="truncate text-zinc-300" title={people(sub.csSet)}>
+        <span className="truncate text-slate-700" title={people(sub.csSet)}>
           {people(sub.csSet)}
         </span>
-        <span className="truncate text-zinc-300" title={people(sub.ieSet)}>
+        <span className="truncate text-slate-700" title={people(sub.ieSet)}>
           {people(sub.ieSet)}
         </span>
         <EyeLink href={`/sub-accounts/${sub.id}`} label="Ver detalle del cliente" />
@@ -365,13 +365,13 @@ function SubAccountBlock({
 
       {/* Nivel 3: agentes */}
       {open && (
-        <div className={`border-t border-zinc-800 ${agentsBg}`}>
+        <div className={`border-t border-slate-200 ${agentsBg}`}>
           {sub.agents.length === 0 ? (
-            <p className="px-3 py-2 pl-6 text-xs text-zinc-500">Sin agentes.</p>
+            <p className="px-3 py-2 pl-6 text-xs text-slate-500">Sin agentes.</p>
           ) : (
             <>
               <div
-                className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-[11px] font-medium tracking-wide text-zinc-600 uppercase`}
+                className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-[11px] font-medium tracking-wide text-slate-400 uppercase`}
               >
                 <span>Agente</span>
                 <span>Etapa</span>
@@ -394,25 +394,25 @@ function SubAccountBlock({
 
 function AgentRowView({ agent }: { agent: AgentRow }) {
   return (
-    <div className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-sm hover:bg-zinc-800/30`}>
-      <span className="truncate font-medium text-zinc-200" title={agent.derivedName}>
+    <div className={`${AGENT_GRID} px-3 py-1.5 pl-6 text-sm hover:bg-slate-50`}>
+      <span className="truncate font-medium text-slate-800" title={agent.derivedName}>
         {agent.derivedName}
       </span>
       <span>
         <AgentStageBadge stage={agent.currentStage} />
       </span>
-      <span className="text-zinc-400">{agent.countryName}</span>
-      <span className="text-zinc-400">{agent.tipoDeMora}</span>
+      <span className="text-slate-500">{agent.countryName}</span>
+      <span className="text-slate-500">{agent.tipoDeMora}</span>
       <span>
         {agent.isLive ? (
           <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
         ) : (
-          <span className="text-zinc-600">—</span>
+          <span className="text-slate-400">—</span>
         )}
       </span>
       <span>
         {agent.isActive ? (
-          <span className="cursor-help text-xs text-zinc-500" title={AGENT_ACTIVE_DESC}>
+          <span className="cursor-help text-xs text-slate-500" title={AGENT_ACTIVE_DESC}>
             Activo
           </span>
         ) : (

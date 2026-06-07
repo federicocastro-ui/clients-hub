@@ -26,8 +26,8 @@ export default async function NewOrgWizardPage({
     return (
       <Shell>
         <Stepper current="org" />
-        <h1 className="mb-1 text-lg font-semibold text-zinc-100">Nueva organización</h1>
-        <p className="mb-5 text-sm text-zinc-500">
+        <h1 className="mb-1 text-lg font-semibold text-slate-900">Nueva organización</h1>
+        <p className="mb-5 text-sm text-slate-500">
           Empecemos por la organización. Después vas a poder sumar clientes y agentes.
         </p>
         <form action={createOrganizationStep_} className="flex flex-col gap-4">
@@ -54,10 +54,10 @@ export default async function NewOrgWizardPage({
     return (
       <Shell>
         <Stepper current="clients" />
-        <h1 className="mb-1 text-lg font-semibold text-zinc-100">
+        <h1 className="mb-1 text-lg font-semibold text-slate-900">
           Clientes de {org.name}
         </h1>
-        <p className="mb-5 text-sm text-zinc-500">
+        <p className="mb-5 text-sm text-slate-500">
           Agregá uno o más clientes. Podés saltar este paso si todavía no los tenés.
         </p>
 
@@ -66,10 +66,10 @@ export default async function NewOrgWizardPage({
             {org.clients.map((c) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-2 rounded-md border border-zinc-800 bg-zinc-900/40 px-3 py-2 text-sm"
+                className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm"
               >
-                <span className="text-zinc-200">{c.name}</span>
-                <span className="flex items-center gap-2 text-xs text-zinc-500">
+                <span className="text-slate-800">{c.name}</span>
+                <span className="flex items-center gap-2 text-xs text-slate-500">
                   T{c.tier} · {c.agents.length} agentes
                   <ClientStatusBadge status={c.status} />
                 </span>
@@ -78,8 +78,8 @@ export default async function NewOrgWizardPage({
           </ul>
         )}
 
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
-          <p className="mb-3 text-xs font-medium tracking-wide text-zinc-400 uppercase">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] p-4">
+          <p className="mb-3 text-xs font-medium tracking-wide text-slate-500 uppercase">
             Agregar cliente
           </p>
           <form action={createSubAccount_} className="flex flex-col gap-4">
@@ -91,12 +91,12 @@ export default async function NewOrgWizardPage({
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-2">
-          <Link href={`/clients/${orgId}`} className="text-sm text-zinc-400 hover:text-zinc-200">
+          <Link href={`/clients/${orgId}`} className="text-sm text-slate-500 hover:text-slate-800">
             Saltar y finalizar
           </Link>
           <Link
             href={`/clients/new?step=agents&orgId=${orgId}`}
-            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
+            className="rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)]"
           >
             Continuar a agentes →
           </Link>
@@ -109,13 +109,13 @@ export default async function NewOrgWizardPage({
   return (
     <Shell>
       <Stepper current="agents" />
-      <h1 className="mb-1 text-lg font-semibold text-zinc-100">Agentes</h1>
-      <p className="mb-5 text-sm text-zinc-500">
+      <h1 className="mb-1 text-lg font-semibold text-slate-900">Agentes</h1>
+      <p className="mb-5 text-sm text-slate-500">
         Sumá agentes a cada cliente de {org.name}. Podés saltar y hacerlo después.
       </p>
 
       {org.clients.length === 0 ? (
-        <div className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-6 text-sm text-zinc-400">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] p-6 text-sm text-slate-500">
           Esta organización no tiene clientes.{' '}
           <Link
             href={`/clients/new?step=clients&orgId=${orgId}`}
@@ -128,9 +128,9 @@ export default async function NewOrgWizardPage({
       ) : (
         <div className="flex flex-col gap-4">
           {org.clients.map((client) => (
-            <section key={client.id} className="rounded-lg border border-zinc-800 bg-zinc-900/40 p-4">
+            <section key={client.id} className="rounded-2xl border border-slate-200 bg-white shadow-[0_10px_30px_rgba(15,23,42,0.06)] p-4">
               <div className="mb-3 flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-zinc-100">{client.name}</h2>
+                <h2 className="text-sm font-semibold text-slate-900">{client.name}</h2>
                 <ClientStatusBadge status={client.status} />
               </div>
 
@@ -139,9 +139,9 @@ export default async function NewOrgWizardPage({
                   {client.agents.map((a) => (
                     <li
                       key={a.id}
-                      className="flex items-center justify-between gap-2 rounded-md border border-zinc-800 bg-zinc-950/40 px-3 py-1.5 text-sm"
+                      className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm"
                     >
-                      <span className="truncate text-zinc-200">{a.label}</span>
+                      <span className="truncate text-slate-800">{a.label}</span>
                       <AgentStageBadge stage={a.currentStage} />
                     </li>
                   ))}
@@ -171,13 +171,13 @@ export default async function NewOrgWizardPage({
       <div className="mt-6 flex items-center justify-between gap-2">
         <Link
           href={`/clients/new?step=clients&orgId=${orgId}`}
-          className="text-sm text-zinc-400 hover:text-zinc-200"
+          className="text-sm text-slate-500 hover:text-slate-800"
         >
           ← Clientes
         </Link>
         <Link
           href={`/clients/${orgId}`}
-          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
+          className="rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)]"
         >
           Finalizar
         </Link>

@@ -31,21 +31,21 @@ export default async function ClientDetailPage({
 
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-lg font-semibold text-zinc-100">{client.name}</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <h1 className="text-lg font-semibold text-slate-900">{client.name}</h1>
+          <p className="mt-1 text-sm text-slate-500">
             Creado el {fmtDate(client.createdAt)}
           </p>
         </div>
         <div className="flex shrink-0 gap-2">
           <Link
             href={`/clients/${client.id}/edit`}
-            className="rounded-md border border-zinc-700 px-3 py-1.5 text-sm text-zinc-200 hover:bg-zinc-800"
+            className="rounded-xl border border-slate-300 px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-100"
           >
             Editar
           </Link>
           <Link
             href={`/sub-accounts/new?clientId=${client.id}`}
-            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-white hover:bg-accent-hover"
+            className="rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)]"
           >
             + Nuevo cliente
           </Link>
@@ -66,20 +66,20 @@ export default async function ClientDetailPage({
 
         <Section title="Clientes">
           {client.subAccounts.length === 0 ? (
-            <p className="text-sm text-zinc-500">Sin clientes.</p>
+            <p className="text-sm text-slate-500">Sin clientes.</p>
           ) : (
-            <ul className="flex flex-col divide-y divide-zinc-800/60">
+            <ul className="flex flex-col divide-y divide-slate-200">
               {client.subAccounts.map((s) => (
                 <li key={s.id}>
                   <Link
                     href={`/sub-accounts/${s.id}`}
-                    className="flex items-center justify-between gap-3 py-2 hover:bg-zinc-800/30"
+                    className="flex items-center justify-between gap-3 py-2 hover:bg-slate-50"
                   >
                     <span className="flex min-w-0 items-center gap-2">
-                      <span className="truncate text-sm font-medium text-zinc-200">
+                      <span className="truncate text-sm font-medium text-slate-800">
                         {s.name}
                       </span>
-                      <span className="shrink-0 text-xs text-zinc-500">
+                      <span className="shrink-0 text-xs text-slate-500">
                         T{s.tier} · {s.agentCount} agentes
                         {s.vendedor ? ` · vendió ${s.vendedor.name}` : ''}
                       </span>
