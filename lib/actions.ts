@@ -23,15 +23,14 @@ import type { RawAgent, RawClient, RawSubAccount } from './queries'
 function usingMock(): boolean {
   return !(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+    process.env.SUPABASE_SERVICE_ROLE_KEY
   )
 }
 
-// Cliente sin genérico de tipos: la capa de actions arma los payloads a mano.
 function db() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
   )
 }
 

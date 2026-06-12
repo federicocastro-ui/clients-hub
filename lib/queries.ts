@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
 import type { Database, AgentStage, SubAccountStatus, TipoDeMora } from './database.types'
+import { createServerClient } from './supabase'
 import { deriveAgentName, SUB_ACCOUNT_STATUS_ORDER } from './display'
 import type { StageLog } from './stage-metrics'
 import type {
@@ -76,7 +76,7 @@ const MORA_ORDER: TipoDeMora[] = ['B0', 'B1', 'B2', 'B3', 'B4', 'Judicial']
 function supabaseConfigured(): boolean {
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
   )
 }
 
@@ -87,10 +87,7 @@ async function fetchRawClients(): Promise<RawClient[]> {
     return MOCK_CLIENTS
   }
 
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = createServerClient()
 
   const { data, error } = await supabase
     .from('clients')
@@ -267,10 +264,7 @@ export async function getTeamMembers(): Promise<PersonRef[]> {
     const { MOCK_TEAM_MEMBERS } = await import('./mock-data')
     return [...MOCK_TEAM_MEMBERS].sort((a, b) => a.name.localeCompare(b.name))
   }
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = createServerClient()
   const { data, error } = await supabase
     .from('team_members')
     .select('id, name')
@@ -284,10 +278,7 @@ export async function getCountries(): Promise<PersonRef[]> {
     const { MOCK_COUNTRIES } = await import('./mock-data')
     return [...MOCK_COUNTRIES].sort((a, b) => a.name.localeCompare(b.name))
   }
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = createServerClient()
   const { data, error } = await supabase
     .from('countries')
     .select('id, name')
@@ -317,10 +308,7 @@ async function fetchStageLogs(agentId: string, currentStage: string): Promise<St
       changedAt: l.changed_at,
     }))
   }
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = createServerClient()
   const { data, error } = await supabase
     .from('agent_stage_logs')
     .select('from_stage, to_stage, changed_at')
@@ -381,10 +369,7 @@ export async function getAgentDocuments(agentId: string): Promise<AgentDocument[
     const { MOCK_AGENT_DOCS } = await import('./mock-data')
     return [...(MOCK_AGENT_DOCS[agentId] ?? [])]
   }
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = createServerClient()
   const { data, error } = await supabase
     .from('agent_documents')
     .select('id, kind, label, url')
@@ -401,10 +386,7 @@ export async function getSubAccountNotes(subAccountId: string): Promise<Note[]> 
       .map((n) => ({ id: n.id, body: n.body, author: n.author, createdAt: n.created_at }))
       .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
   }
-  const supabase = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  )
+  const supabase = createServerClient()
   const { data, error } = await supabase
     .from('sub_account_notes')
     .select('id, body, author, created_at')
