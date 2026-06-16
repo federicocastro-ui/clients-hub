@@ -266,6 +266,64 @@ const INITIAL_STAGE_LOGS: Record<string, Omit<MockStageLog, 'id'>[]> = {
     { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(9) },
     { from_stage: 'entregado_qa', to_stage: 'iterando_qa', changed_at: daysAgo(4) },
   ],
+  // Wallet B2 — hasta en_construccion
+  'ag-3': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(25) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(20) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(15) },
+  ],
+  // Wallet Judicial — recién en backlog
+  'ag-4': [{ from_stage: null, to_stage: 'backlog', changed_at: daysAgo(8) }],
+  // Créditos B3 — hasta entregado_qa
+  'ag-5': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(30) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(26) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(22) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(10) },
+  ],
+  // Tarjetas B0 — progresión completa hasta en_produccion
+  'ag-6': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(50) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(45) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(40) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(28) },
+    { from_stage: 'entregado_qa', to_stage: 'listo_para_mostrar', changed_at: daysAgo(18) },
+    { from_stage: 'listo_para_mostrar', to_stage: 'en_produccion', changed_at: daysAgo(7) },
+  ],
+  // Tarjetas B1 — llegó a producción y volvió a iterar con el cliente
+  'ag-7': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(60) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(55) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(48) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(35) },
+    { from_stage: 'entregado_qa', to_stage: 'listo_para_mostrar', changed_at: daysAgo(25) },
+    { from_stage: 'listo_para_mostrar', to_stage: 'en_produccion', changed_at: daysAgo(15) },
+    { from_stage: 'en_produccion', to_stage: 'iterando_cliente', changed_at: daysAgo(5) },
+  ],
+  // Préstamos B2 — hasta listo_para_mostrar
+  'ag-8': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(35) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(30) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(24) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(12) },
+    { from_stage: 'entregado_qa', to_stage: 'listo_para_mostrar', changed_at: daysAgo(4) },
+  ],
+  // Préstamos B1 — con una vuelta por iterando_qa, hasta en_produccion (dado de baja)
+  'ag-9': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(45) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(40) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(34) },
+    { from_stage: 'en_construccion', to_stage: 'entregado_qa', changed_at: daysAgo(22) },
+    { from_stage: 'entregado_qa', to_stage: 'iterando_qa', changed_at: daysAgo(16) },
+    { from_stage: 'iterando_qa', to_stage: 'listo_para_mostrar', changed_at: daysAgo(10) },
+    { from_stage: 'listo_para_mostrar', to_stage: 'en_produccion', changed_at: daysAgo(3) },
+  ],
+  // Cobranza temprana B3 — hasta en_construccion
+  'ag-10': [
+    { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(18) },
+    { from_stage: 'backlog', to_stage: 'nuevo', changed_at: daysAgo(14) },
+    { from_stage: 'nuevo', to_stage: 'en_construccion', changed_at: daysAgo(9) },
+  ],
 }
 
 // ── Store mutable compartido vía globalThis ──────────────────
