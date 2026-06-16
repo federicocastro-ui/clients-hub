@@ -6,6 +6,7 @@ import type {
   AgentDetail,
   AgentDocument,
   AgentEditData,
+  AgentListRow,
   Note,
   AgentRow,
   ClientDetail,
@@ -197,6 +198,48 @@ export async function getClientHubData(): Promise<StatusGroup[]> {
 
 export function isUsingMockData(): boolean {
   return !supabaseConfigured()
+}
+
+// ── Vista global de agentes ──────────────────────────────────
+
+export async function getAllAgents(): Promise<AgentListRow[]> {
+  const rawClients = await fetchRawClients()
+  const rows: AgentListRow[] = []
+  for (const client of rawClients) {
+    for (const sa of client.sub_accounts) {
+      for (const a of sa.agents) {
+        const country = one(a.country)
+        const countryName = country?.name ?? '—'
+        rows.push({
+          id: a.id,
+          derivedName: deriveAgentName({
+            clientName: client.name,
+            subAccountName: sa.name,
+            tipoDeMora: a.tipo_de_mora,
+            countryName,
+          }),
+          clientId: client.id,
+          clientName: client.name,
+          subAccountId: sa.id,
+          subAccountName: sa.name,
+          tipoDeMora: a.tipo_de_mora,
+          countryName,
+          currentStage: a.current_stage,
+          isLive: a.is_live,
+          isActive: a.is_active,
+          onb: one(a.onb),
+          cs: one(a.cs),
+          ie: one(a.ie),
+        })
+      }
+    }
+  }
+  return rows.sort(
+    (x, y) =>
+      x.clientName.localeCompare(y.clientName) ||
+      x.subAccountName.localeCompare(y.subAccountName) ||
+      x.tipoDeMora.localeCompare(y.tipoDeMora),
+  )
 }
 
 // ── Panel de administración ──────────────────────────────────

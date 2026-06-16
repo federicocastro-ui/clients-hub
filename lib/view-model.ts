@@ -57,6 +57,24 @@ export interface OrgAdminRow {
   agentCount: number
 }
 
+// Fila de la vista global de Agentes (todos los agentes, aplanados).
+export interface AgentListRow {
+  id: string
+  derivedName: string
+  clientId: string // organización
+  clientName: string
+  subAccountId: string // cliente (sub-cuenta)
+  subAccountName: string
+  tipoDeMora: TipoDeMora
+  countryName: string
+  currentStage: AgentStage
+  isLive: boolean
+  isActive: boolean
+  onb: PersonRef | null
+  cs: PersonRef | null
+  ie: PersonRef | null
+}
+
 // Campos editables de un agente (precarga de formularios).
 export interface AgentEditData {
   id: string
