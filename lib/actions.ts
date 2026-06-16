@@ -6,11 +6,13 @@ import { createClient } from '@supabase/supabase-js'
 import type { AgentStage, SubAccountStatus, TipoDeMora } from './database.types'
 import {
   MOCK_AGENT_DOCS,
+  MOCK_CONTACTS,
   MOCK_SUBACCOUNT_NOTES,
   MOCK_CLIENTS,
   MOCK_COUNTRIES,
   MOCK_STAGE_LOGS,
   MOCK_TEAM_MEMBERS,
+  type MockContact,
   type MockStageLog,
 } from './mock-data'
 import type { RawAgent, RawClient, RawSubAccount } from './queries'
@@ -21,6 +23,8 @@ import type { RawAgent, RawClient, RawSubAccount } from './queries'
 // ─────────────────────────────────────────────────────────────
 
 function usingMock(): boolean {
+  // USE_MOCK=1 fuerza el store mock en local sin tocar Supabase.
+  if (process.env.USE_MOCK === '1') return true
   return !(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
     process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -435,4 +439,110 @@ export async function changeAgentStage_(id: string, fd: FormData) {
     if (error) throw new Error(error.message)
   }
   revalidateAll()
+}
+
+// ── Contactos ────────────────────────────────────────────────
+
+function subAccountIdsFrom(fd: FormData): string[] {
+  return fd.getAll('sub_account_ids').map((v) => String(v)).filter(Boolean)
+}
+
+export async function createContact_(fd: FormData) {
+  const clientId = str(fd, 'client_id')
+  const name = str(fd, 'name')
+  if (!clientId || !name) throw new Error('Faltan organización o nombre')
+  const subAccountIds = subAccountIdsFrom(fd)
+  const email = strOrNull(fd, 'email')
+  const phone = strOrNull(fd, 'phone')
+  const role = strOrNull(fd, 'role')
+  const notes = strOrNull(fd, 'notes')
+
+  if (usingMock()) {
+    const contact: MockContact = {
+      id: crypto.randomUUID(),
+      client_id: clientId,
+      name,
+      email,
+      phone,
+      role,
+      notes,
+      created_at: new Date().toISOString(),
+      sub_account_ids: subAccountIds,
+    }
+    MOCK_CONTACTS.push(contact)
+  } else {
+    const supabase = db()
+    const { data, error } = await supabase
+      .from('contacts')
+      .insert({ client_id: clientId, name, email, phone, role, notes })
+      .select('id')
+      .single()
+    if (error) throw new Error(error.message)
+    const id = (data as { id: string }).id
+    if (subAccountIds.length) {
+      const { error: linkErr } = await supabase
+        .from('contact_sub_accounts')
+        .insert(subAccountIds.map((sid) => ({ contact_id: id, sub_account_id: sid })))
+      if (linkErr) throw new Error(linkErr.message)
+    }
+  }
+  revalidateAll()
+  redirect('/contacts')
+}
+
+export async function updateContact_(id: string, fd: FormData) {
+  const clientId = str(fd, 'client_id')
+  const name = str(fd, 'name')
+  if (!clientId || !name) throw new Error('Faltan organización o nombre')
+  const subAccountIds = subAccountIdsFrom(fd)
+  const email = strOrNull(fd, 'email')
+  const phone = strOrNull(fd, 'phone')
+  const role = strOrNull(fd, 'role')
+  const notes = strOrNull(fd, 'notes')
+
+  if (usingMock()) {
+    const c = MOCK_CONTACTS.find((x) => x.id === id)
+    if (c) {
+      c.client_id = clientId
+      c.name = name
+      c.email = email
+      c.phone = phone
+      c.role = role
+      c.notes = notes
+      c.sub_account_ids = subAccountIds
+    }
+  } else {
+    const supabase = db()
+    const { error } = await supabase
+      .from('contacts')
+      .update({ client_id: clientId, name, email, phone, role, notes })
+      .eq('id', id)
+    if (error) throw new Error(error.message)
+    // Reemplaza el set de vínculos.
+    const { error: delErr } = await supabase
+      .from('contact_sub_accounts')
+      .delete()
+      .eq('contact_id', id)
+    if (delErr) throw new Error(delErr.message)
+    if (subAccountIds.length) {
+      const { error: insErr } = await supabase
+        .from('contact_sub_accounts')
+        .insert(subAccountIds.map((sid) => ({ contact_id: id, sub_account_id: sid })))
+      if (insErr) throw new Error(insErr.message)
+    }
+  }
+  revalidateAll()
+  redirect(strOrNull(fd, '__redirect') ?? `/contacts/${id}`)
+}
+
+export async function removeContact_(id: string) {
+  if (usingMock()) {
+    const i = MOCK_CONTACTS.findIndex((x) => x.id === id)
+    if (i >= 0) MOCK_CONTACTS.splice(i, 1)
+  } else {
+    const { error } = await db().from('contacts').delete().eq('id', id)
+    if (error) throw new Error(error.message)
+  }
+  revalidateAll()
+  redirect('/contacts')
 }

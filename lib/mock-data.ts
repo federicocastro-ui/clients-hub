@@ -308,6 +308,56 @@ const INITIAL_SUBACCOUNT_NOTES: Record<string, MockNote[]> = {
   ],
 }
 
+// Contacto: persona que pertenece a una organización (client_id) y se
+// vincula a cero o más de sus clientes/sub-cuentas (sub_account_ids).
+export interface MockContact {
+  id: string
+  client_id: string
+  name: string
+  email: string | null
+  phone: string | null
+  role: string | null
+  notes: string | null
+  created_at: string
+  sub_account_ids: string[]
+}
+
+const INITIAL_CONTACTS: MockContact[] = [
+  {
+    id: 'ct-1',
+    client_id: 'cl-1', // ilumia
+    name: 'Juan Pérez',
+    email: 'juan.perez@ilumia.com',
+    phone: '+54 11 5555-1234',
+    role: 'Gerente de Cobranzas',
+    notes: 'Punto de contacto principal para operaciones.',
+    created_at: daysAgo(30),
+    sub_account_ids: ['sa-1'], // Directv
+  },
+  {
+    id: 'ct-2',
+    client_id: 'cl-2', // acme
+    name: 'María González',
+    email: 'maria.gonzalez@acme.com',
+    phone: '+52 55 4444-9876',
+    role: 'CFO',
+    notes: null,
+    created_at: daysAgo(20),
+    sub_account_ids: ['sa-2', 'sa-3'], // Wallet, Créditos
+  },
+  {
+    id: 'ct-3',
+    client_id: 'cl-3', // nexa
+    name: 'Carlos Ruiz',
+    email: 'carlos.ruiz@nexa.com',
+    phone: null,
+    role: 'Jefe de Riesgo',
+    notes: 'Prefiere comunicación por email.',
+    created_at: daysAgo(12),
+    sub_account_ids: [],
+  },
+]
+
 interface MockStore {
   clients: RawClient[]
   countries: { id: string; name: string }[]
@@ -315,6 +365,7 @@ interface MockStore {
   stageLogs: Record<string, MockStageLog[]>
   agentDocs: Record<string, MockAgentDocument[]>
   subAccountNotes: Record<string, MockNote[]>
+  contacts: MockContact[]
 }
 
 const g = globalThis as unknown as { __klevaMock?: MockStore }
@@ -327,6 +378,7 @@ const store: MockStore =
     stageLogs: INITIAL_STAGE_LOGS,
     agentDocs: INITIAL_AGENT_DOCS,
     subAccountNotes: INITIAL_SUBACCOUNT_NOTES,
+    contacts: INITIAL_CONTACTS,
   })
 
 export const MOCK_CLIENTS = store.clients
@@ -335,6 +387,7 @@ export const MOCK_TEAM_MEMBERS = store.teamMembers
 export const MOCK_STAGE_LOGS = store.stageLogs
 export const MOCK_AGENT_DOCS = store.agentDocs
 export const MOCK_SUBACCOUNT_NOTES = store.subAccountNotes
+export const MOCK_CONTACTS = store.contacts
 
 // Para agentes sin logs explícitos: un único log inicial al stage actual.
 export function mockStageLogsFor(agentId: string, currentStage: string): MockStageLog[] {

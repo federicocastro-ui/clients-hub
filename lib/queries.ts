@@ -7,6 +7,9 @@ import type {
   AgentDocument,
   AgentEditData,
   AgentListRow,
+  ContactDetail,
+  ContactEditData,
+  ContactListRow,
   Note,
   AgentRow,
   ClientDetail,
@@ -14,6 +17,7 @@ import type {
   ManageAgent,
   OrgAdminRow,
   OrgManageData,
+  OrgWithClients,
   PersonRef,
   StatusGroup,
   SubAccountDetail,
@@ -75,6 +79,8 @@ const MORA_ORDER: TipoDeMora[] = ['B0', 'B1', 'B2', 'B3', 'B4', 'Judicial']
 // ── Acceso a datos ───────────────────────────────────────────
 
 function supabaseConfigured(): boolean {
+  // USE_MOCK=1 fuerza el store mock en local sin tocar Supabase.
+  if (process.env.USE_MOCK === '1') return false
   return Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
       process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -240,6 +246,142 @@ export async function getAllAgents(): Promise<AgentListRow[]> {
       x.subAccountName.localeCompare(y.subAccountName) ||
       x.tipoDeMora.localeCompare(y.tipoDeMora),
   )
+}
+
+// ── Contactos ────────────────────────────────────────────────
+
+// Orgs con sus clientes (sub-cuentas) para poblar el formulario de contacto.
+export async function getOrgsWithClients(): Promise<OrgWithClients[]> {
+  const rawClients = await fetchRawClients()
+  return rawClients
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      clients: c.sub_accounts
+        .map((sa) => ({ id: sa.id, name: sa.name }))
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+// Shape crudo de un contacto (mock | supabase).
+interface RawContact {
+  id: string
+  client_id: string
+  name: string
+  email: string | null
+  phone: string | null
+  role: string | null
+  notes: string | null
+  links: { id: string; name: string }[] // sub-cuentas vinculadas
+}
+
+async function fetchRawContacts(): Promise<RawContact[]> {
+  if (!supabaseConfigured()) {
+    const { MOCK_CONTACTS, MOCK_CLIENTS } = await import('./mock-data')
+    const subName = (id: string): string => {
+      for (const c of MOCK_CLIENTS) {
+        const sa = c.sub_accounts.find((s) => s.id === id)
+        if (sa) return sa.name
+      }
+      return id
+    }
+    return MOCK_CONTACTS.map((ct) => ({
+      id: ct.id,
+      client_id: ct.client_id,
+      name: ct.name,
+      email: ct.email,
+      phone: ct.phone,
+      role: ct.role,
+      notes: ct.notes,
+      links: ct.sub_account_ids.map((id) => ({ id, name: subName(id) })),
+    }))
+  }
+
+  const supabase = createServerClient()
+  const { data, error } = await supabase
+    .from('contacts')
+    .select(
+      `
+      id, client_id, name, email, phone, role, notes,
+      contact_sub_accounts ( sub_accounts ( id, name ) )
+    `,
+    )
+    .order('name')
+  if (error) throw new Error(`Supabase contacts query failed: ${error.message}`)
+  const rows = (data ?? []) as unknown as Array<{
+    id: string
+    client_id: string
+    name: string
+    email: string | null
+    phone: string | null
+    role: string | null
+    notes: string | null
+    contact_sub_accounts: { sub_accounts: { id: string; name: string } | null }[]
+  }>
+  return rows.map((r) => ({
+    id: r.id,
+    client_id: r.client_id,
+    name: r.name,
+    email: r.email,
+    phone: r.phone,
+    role: r.role,
+    notes: r.notes,
+    links: (r.contact_sub_accounts ?? [])
+      .map((l) => l.sub_accounts)
+      .filter((s): s is { id: string; name: string } => s != null),
+  }))
+}
+
+export async function getAllContacts(): Promise<ContactListRow[]> {
+  const [contacts, rawClients] = await Promise.all([fetchRawContacts(), fetchRawClients()])
+  const orgName = (id: string): string => rawClients.find((c) => c.id === id)?.name ?? '—'
+  return contacts
+    .map((ct) => ({
+      id: ct.id,
+      name: ct.name,
+      email: ct.email,
+      phone: ct.phone,
+      role: ct.role,
+      clientId: ct.client_id,
+      clientName: orgName(ct.client_id),
+      linkedClients: [...ct.links].sort((a, b) => a.name.localeCompare(b.name)),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+}
+
+export async function getContactDetail(id: string): Promise<ContactDetail | null> {
+  const contacts = await fetchRawContacts()
+  const ct = contacts.find((c) => c.id === id)
+  if (!ct) return null
+  const rawClients = await fetchRawClients()
+  return {
+    id: ct.id,
+    name: ct.name,
+    email: ct.email,
+    phone: ct.phone,
+    role: ct.role,
+    notes: ct.notes,
+    clientId: ct.client_id,
+    clientName: rawClients.find((c) => c.id === ct.client_id)?.name ?? '—',
+    linkedClients: [...ct.links].sort((a, b) => a.name.localeCompare(b.name)),
+  }
+}
+
+export async function getContactForEdit(id: string): Promise<ContactEditData | null> {
+  const contacts = await fetchRawContacts()
+  const ct = contacts.find((c) => c.id === id)
+  if (!ct) return null
+  return {
+    id: ct.id,
+    name: ct.name,
+    email: ct.email,
+    phone: ct.phone,
+    role: ct.role,
+    notes: ct.notes,
+    clientId: ct.client_id,
+    subAccountIds: ct.links.map((l) => l.id),
+  }
 }
 
 // ── Panel de administración ──────────────────────────────────

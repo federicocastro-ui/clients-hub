@@ -57,6 +57,44 @@ export interface OrgAdminRow {
   agentCount: number
 }
 
+// ── Contactos ────────────────────────────────────────────────
+
+// Una org con sus clientes (sub-cuentas), para poblar el formulario de contacto.
+export interface OrgWithClients {
+  id: string
+  name: string
+  clients: { id: string; name: string }[]
+}
+
+// Fila de la vista de Contactos.
+export interface ContactListRow {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  role: string | null
+  clientId: string // organización
+  clientName: string
+  linkedClients: { id: string; name: string }[] // sub-cuentas vinculadas
+}
+
+// Detalle de un contacto.
+export interface ContactDetail extends ContactListRow {
+  notes: string | null
+}
+
+// Campos editables de un contacto (precarga de formulario).
+export interface ContactEditData {
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  role: string | null
+  notes: string | null
+  clientId: string
+  subAccountIds: string[]
+}
+
 // Fila de la vista global de Agentes (todos los agentes, aplanados).
 export interface AgentListRow {
   id: string

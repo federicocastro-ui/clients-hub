@@ -136,6 +136,31 @@ export interface Database {
         }
         Update: Partial<Database['public']['Tables']['sub_account_notes']['Insert']>
       }
+      contacts: {
+        Row: {
+          id: string
+          client_id: string
+          name: string
+          email: string | null
+          phone: string | null
+          role: string | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['contacts']['Row'], 'id' | 'created_at'> & {
+          id?: string
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['contacts']['Insert']>
+      }
+      contact_sub_accounts: {
+        Row: {
+          contact_id: string
+          sub_account_id: string
+        }
+        Insert: Database['public']['Tables']['contact_sub_accounts']['Row']
+        Update: Partial<Database['public']['Tables']['contact_sub_accounts']['Insert']>
+      }
     }
     Views: Record<string, never>
     Functions: Record<string, never>

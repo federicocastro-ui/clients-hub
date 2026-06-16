@@ -29,10 +29,8 @@ export default async function Home() {
 
       {usingMock && (
         <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-          Mostrando datos de ejemplo (mock local). Configurá{' '}
-          <code className="font-mono">NEXT_PUBLIC_SUPABASE_URL</code> y{' '}
-          <code className="font-mono">SUPABASE_SERVICE_ROLE_KEY</code> en{' '}
-          <code className="font-mono">.env.local</code> para leer de Supabase.
+          Datos de ejemplo (mock local). Los cambios no se guardan en Supabase y se reinician al
+          reiniciar el server.
         </div>
       )}
 
