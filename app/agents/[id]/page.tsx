@@ -8,6 +8,7 @@ import {
   getAgentDetail,
   getAgentDocuments,
   getAgentForEdit,
+  getAgentStageLogs,
   getCountries,
   getTeamMembers,
 } from '@/lib/queries'
@@ -17,6 +18,7 @@ import {
   changeAgentStage_,
   removeAgentDocument_,
   updateAgent_,
+  updateStageLogDates_,
 } from '@/lib/actions'
 import { AgentStageBadge } from '@/components/StatusBadge'
 import {
@@ -70,6 +72,7 @@ export default async function AgentDetailPage({
   const editData = isEdit ? await getAgentForEdit(id) : null
   const countries = isEdit ? await getCountries() : []
   const members = isEdit ? await getTeamMembers() : []
+  const stageLogRows = isEdit ? await getAgentStageLogs(id) : []
 
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-6 sm:px-6">
@@ -236,6 +239,39 @@ export default async function AgentDetailPage({
                 </div>
               </form>
             </div>
+          </Section>
+
+          {/* Editar fechas del timeline */}
+          <Section
+            title="Timeline de etapas"
+            note="Ajustá la fecha de cada cambio de etapa (útil para registrar cambios pasados)."
+          >
+            {stageLogRows.length === 0 ? (
+              <p className="text-sm text-slate-500">Sin cambios de etapa registrados.</p>
+            ) : (
+              <form
+                action={updateStageLogDates_.bind(null, agent.id)}
+                className="flex flex-col gap-3"
+              >
+                {stageLogRows.map((log) => (
+                  <div key={log.id} className="flex flex-wrap items-center gap-3">
+                    <input type="hidden" name="log_id" value={log.id} />
+                    <span className="w-44 shrink-0">
+                      <AgentStageBadge stage={log.toStage} />
+                    </span>
+                    <input
+                      type="date"
+                      name="changed_at"
+                      defaultValue={log.changedAt.slice(0, 10)}
+                      className="rounded-xl border border-slate-300 bg-white px-2.5 py-1.5 text-sm text-slate-900 outline-none transition focus:border-[#4f46e5] focus:shadow-[0_0_0_4px_rgba(79,70,229,0.15)]"
+                    />
+                  </div>
+                ))}
+                <div>
+                  <SubmitButton label="Guardar fechas" />
+                </div>
+              </form>
+            )}
           </Section>
         </div>
       ) : (

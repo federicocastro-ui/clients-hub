@@ -251,7 +251,12 @@ export async function createAgent_(fd: FormData) {
     })
     // log inicial (en Supabase lo hace el trigger)
     MOCK_STAGE_LOGS[id] = [
-      { from_stage: null, to_stage: currentStage, changed_at: new Date().toISOString() },
+      {
+        id: crypto.randomUUID(),
+        from_stage: null,
+        to_stage: currentStage,
+        changed_at: new Date().toISOString(),
+      },
     ]
   } else {
     const { data, error } = await db()
@@ -423,6 +428,7 @@ export async function changeAgentStage_(id: string, fd: FormData) {
     const a = mockFindAgent(id)
     if (a && a.current_stage !== newStage) {
       const log: MockStageLog = {
+        id: crypto.randomUUID(),
         from_stage: a.current_stage,
         to_stage: newStage,
         changed_at: new Date().toISOString(),
@@ -439,6 +445,40 @@ export async function changeAgentStage_(id: string, fd: FormData) {
     if (error) throw new Error(error.message)
   }
   revalidateAll()
+}
+
+// Edita las fechas de los logs de etapa (para backdatear cambios).
+export async function updateStageLogDates_(agentId: string, fd: FormData) {
+  const ids = fd.getAll('log_id').map(String)
+  const dates = fd.getAll('changed_at').map(String)
+  const updates = ids
+    .map((id, i) => ({ id, date: dates[i] }))
+    .filter((u) => u.id && u.date)
+    // El input date da YYYY-MM-DD; fijamos mediodía UTC para que la fecha
+    // mostrada no se corra por zona horaria.
+    .map((u) => ({ id: u.id, iso: new Date(`${u.date}T12:00:00.000Z`).toISOString() }))
+
+  if (usingMock()) {
+    const arr = MOCK_STAGE_LOGS[agentId]
+    if (arr) {
+      for (const u of updates) {
+        const log = arr.find((l) => l.id === u.id)
+        if (log) log.changed_at = u.iso
+      }
+    }
+  } else {
+    const supabase = db()
+    for (const u of updates) {
+      const { error } = await supabase
+        .from('agent_stage_logs')
+        .update({ changed_at: u.iso })
+        .eq('id', u.id)
+        .eq('agent_id', agentId)
+      if (error) throw new Error(error.message)
+    }
+  }
+  revalidateAll()
+  redirect(`/agents/${agentId}?edit=1`)
 }
 
 // ── Contactos ────────────────────────────────────────────────

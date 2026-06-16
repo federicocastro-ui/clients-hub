@@ -19,6 +19,7 @@ import type {
   OrgManageData,
   OrgWithClients,
   PersonRef,
+  StageLogRow,
   StatusGroup,
   SubAccountDetail,
   SubAccountRow,
@@ -547,6 +548,41 @@ export async function getAgentDetail(id: string): Promise<AgentDetail | null> {
     }
   }
   return null
+}
+
+// Logs de etapa CON id, para editar sus fechas en modo edición.
+export async function getAgentStageLogs(agentId: string): Promise<StageLogRow[]> {
+  if (!supabaseConfigured()) {
+    const { MOCK_STAGE_LOGS } = await import('./mock-data')
+    const arr = MOCK_STAGE_LOGS[agentId] ?? []
+    return arr
+      .map((l) => ({
+        id: l.id,
+        fromStage: l.from_stage as AgentStage | null,
+        toStage: l.to_stage as AgentStage,
+        changedAt: l.changed_at,
+      }))
+      .sort((a, b) => +new Date(a.changedAt) - +new Date(b.changedAt))
+  }
+  const supabase = createServerClient()
+  const { data, error } = await supabase
+    .from('agent_stage_logs')
+    .select('id, from_stage, to_stage, changed_at')
+    .eq('agent_id', agentId)
+    .order('changed_at', { ascending: true })
+  if (error) throw new Error(`Supabase stage logs query failed: ${error.message}`)
+  const rows = (data ?? []) as unknown as Array<{
+    id: string
+    from_stage: AgentStage | null
+    to_stage: AgentStage
+    changed_at: string
+  }>
+  return rows.map((l) => ({
+    id: l.id,
+    fromStage: l.from_stage,
+    toStage: l.to_stage,
+    changedAt: l.changed_at,
+  }))
 }
 
 export async function getAgentDocuments(agentId: string): Promise<AgentDocument[]> {

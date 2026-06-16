@@ -113,6 +113,14 @@ export interface AgentListRow {
   ie: PersonRef | null
 }
 
+// Fila editable del timeline de etapas (con id para poder actualizar la fecha).
+export interface StageLogRow {
+  id: string
+  fromStage: AgentStage | null
+  toStage: AgentStage
+  changedAt: string
+}
+
 // Campos editables de un agente (precarga de formularios).
 export interface AgentEditData {
   id: string

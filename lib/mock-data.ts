@@ -237,12 +237,14 @@ const DAY = 86_400_000
 const daysAgo = (n: number) => new Date(Date.now() - n * DAY).toISOString()
 
 export interface MockStageLog {
+  id: string
   from_stage: string | null
   to_stage: string
   changed_at: string
 }
 
-const INITIAL_STAGE_LOGS: Record<string, MockStageLog[]> = {
+// Los literales no llevan id; se asignan ids estables al inicializar el store.
+const INITIAL_STAGE_LOGS: Record<string, Omit<MockStageLog, 'id'>[]> = {
   // Directv B0 — progresión con un retroceso a en_construccion
   'ag-1': [
     { from_stage: null, to_stage: 'backlog', changed_at: daysAgo(40) },
@@ -368,6 +370,17 @@ interface MockStore {
   contacts: MockContact[]
 }
 
+// Asigna ids estables a los logs iniciales (id = `${agentId}-log-${i}`).
+function withLogIds(
+  logs: Record<string, Omit<MockStageLog, 'id'>[]>,
+): Record<string, MockStageLog[]> {
+  const out: Record<string, MockStageLog[]> = {}
+  for (const [agentId, arr] of Object.entries(logs)) {
+    out[agentId] = arr.map((l, i) => ({ ...l, id: `${agentId}-log-${i}` }))
+  }
+  return out
+}
+
 const g = globalThis as unknown as { __klevaMock?: MockStore }
 const store: MockStore =
   g.__klevaMock ??
@@ -375,7 +388,7 @@ const store: MockStore =
     clients: INITIAL_CLIENTS,
     countries: INITIAL_COUNTRIES,
     teamMembers: INITIAL_TEAM,
-    stageLogs: INITIAL_STAGE_LOGS,
+    stageLogs: withLogIds(INITIAL_STAGE_LOGS),
     agentDocs: INITIAL_AGENT_DOCS,
     subAccountNotes: INITIAL_SUBACCOUNT_NOTES,
     contacts: INITIAL_CONTACTS,
@@ -393,7 +406,7 @@ export const MOCK_CONTACTS = store.contacts
 export function mockStageLogsFor(agentId: string, currentStage: string): MockStageLog[] {
   return (
     MOCK_STAGE_LOGS[agentId] ?? [
-      { from_stage: null, to_stage: currentStage, changed_at: daysAgo(10) },
+      { id: `${agentId}-log-0`, from_stage: null, to_stage: currentStage, changed_at: daysAgo(10) },
     ]
   )
 }
