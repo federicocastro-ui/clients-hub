@@ -4,7 +4,10 @@ import { Badge } from '@/components/Badge'
 import { AgentStageBadge, ClientStatusBadge } from '@/components/StatusBadge'
 import { Breadcrumb, Field, Section, people } from '@/components/detail-ui'
 import { NotesPanel } from '@/components/NotesPanel'
-import { getSubAccountDetail, getSubAccountNotes } from '@/lib/queries'
+import { SubAccountFormFields } from '@/components/entity-forms'
+import { CancelLink, SubmitButton } from '@/components/form'
+import { updateSubAccount_ } from '@/lib/actions'
+import { getSubAccountDetail, getSubAccountNotes, getTeamMembers } from '@/lib/queries'
 import {
   AGENT_INACTIVE_BADGE,
   AGENT_INACTIVE_DESC,
@@ -16,13 +19,19 @@ export const dynamic = 'force-dynamic'
 
 export default async function SubAccountDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ edit?: string }>
 }) {
   const { id } = await params
+  const { edit } = await searchParams
+  const isEdit = edit === '1'
+
   const sub = await getSubAccountDetail(id)
   if (!sub) notFound()
   const notes = await getSubAccountNotes(id)
+  const members = isEdit ? await getTeamMembers() : []
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
@@ -52,81 +61,152 @@ export default async function SubAccountDetailPage({
             </Link>
           </p>
         </div>
-        <Link
-          href={`/sub-accounts/${sub.id}/edit`}
-          className="shrink-0 rounded-xl border border-slate-300 px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-100"
-        >
-          Editar
-        </Link>
+        {isEdit ? (
+          <Link
+            href={`/sub-accounts/${sub.id}`}
+            className="shrink-0 rounded-xl border border-slate-300 px-3 py-1.5 text-sm text-slate-800 hover:bg-slate-100"
+          >
+            ← Listo
+          </Link>
+        ) : (
+          <Link
+            href={`/sub-accounts/${sub.id}?edit=1`}
+            className="shrink-0 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)]"
+          >
+            Editar
+          </Link>
+        )}
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[1fr_22rem] lg:items-start">
         <div className="flex flex-col gap-4">
-        <Section title="Información">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-            <Field label="Tier">T{sub.tier}</Field>
-            <Field label="Vendedor">{sub.vendedor?.name ?? '—'}</Field>
-            <Field label="Agentes">{sub.agents.length}</Field>
-            <Field label="Onb">{people(sub.onbSet)}</Field>
-            <Field label="CS">{people(sub.csSet)}</Field>
-            <Field label="IE">{people(sub.ieSet)}</Field>
-          </div>
-        </Section>
-
-        <Section
-          title="Agentes"
-          action={
-            <Link
-              href={`/agents/new?subAccountId=${sub.id}`}
-              aria-label="Nuevo agente"
-              title="Nuevo agente"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-accent text-white hover:bg-accent-hover"
-            >
-              <PlusIcon />
-            </Link>
-          }
-        >
-          {sub.agents.length === 0 ? (
-            <p className="text-sm text-slate-500">Sin agentes.</p>
-          ) : (
-            <ul className="flex flex-col divide-y divide-slate-200">
-              {sub.agents.map((a) => (
-                <li
-                  key={a.id}
-                  className="flex items-center justify-between gap-3 py-2 hover:bg-white"
+          {isEdit ? (
+            // ─────────────────────── Modo edición ───────────────────────
+            <>
+              <Section title="Información">
+                <form
+                  action={updateSubAccount_.bind(null, sub.id)}
+                  className="flex flex-col gap-4"
                 >
+                  <input type="hidden" name="__redirect" value={`/sub-accounts/${sub.id}`} />
+                  <SubAccountFormFields
+                    members={members}
+                    defaults={{
+                      name: sub.name,
+                      tier: sub.tier,
+                      status: sub.status,
+                      vendedorId: sub.vendedor?.id ?? null,
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <SubmitButton />
+                    <CancelLink href={`/sub-accounts/${sub.id}`} />
+                  </div>
+                </form>
+              </Section>
+
+              <Section
+                title="Agentes"
+                action={
                   <Link
-                    href={`/agents/${a.id}`}
-                    className="truncate text-sm font-medium text-slate-800 hover:text-slate-900 hover:underline"
+                    href={`/agents/new?subAccountId=${sub.id}`}
+                    aria-label="Nuevo agente"
+                    title="Nuevo agente"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-accent text-white hover:bg-accent-hover"
                   >
-                    {a.derivedName}
+                    <PlusIcon />
                   </Link>
-                  <span className="flex shrink-0 items-center gap-2">
-                    {a.isLive && (
-                      <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
-                    )}
-                    {!a.isActive && (
-                      <Badge
-                        label="Baja"
-                        className={AGENT_INACTIVE_BADGE}
-                        title={AGENT_INACTIVE_DESC}
-                      />
-                    )}
-                    <AgentStageBadge stage={a.currentStage} />
-                    <Link
-                      href={`/agents/${a.id}/edit`}
-                      aria-label="Editar agente"
-                      title="Editar agente"
-                      className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                    >
-                      <PencilIcon />
-                    </Link>
-                  </span>
-                </li>
-              ))}
-            </ul>
+                }
+              >
+                {sub.agents.length === 0 ? (
+                  <p className="text-sm text-slate-500">Sin agentes.</p>
+                ) : (
+                  <ul className="flex flex-col divide-y divide-slate-200">
+                    {sub.agents.map((a) => (
+                      <li key={a.id} className="flex items-center justify-between gap-3 py-2">
+                        <Link
+                          href={`/agents/${a.id}`}
+                          className="truncate text-sm font-medium text-slate-800 hover:text-slate-900 hover:underline"
+                        >
+                          {a.derivedName}
+                        </Link>
+                        <span className="flex shrink-0 items-center gap-2">
+                          {a.isLive && (
+                            <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
+                          )}
+                          {!a.isActive && (
+                            <Badge
+                              label="Baja"
+                              className={AGENT_INACTIVE_BADGE}
+                              title={AGENT_INACTIVE_DESC}
+                            />
+                          )}
+                          <AgentStageBadge stage={a.currentStage} />
+                          <Link
+                            href={`/agents/${a.id}?edit=1`}
+                            aria-label="Editar agente"
+                            title="Editar agente"
+                            className="inline-flex h-6 w-6 items-center justify-center rounded text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+                          >
+                            <PencilIcon />
+                          </Link>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </>
+          ) : (
+            // ─────────────────────── Modo visión ───────────────────────
+            <>
+              <Section title="Información">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  <Field label="Tier">T{sub.tier}</Field>
+                  <Field label="Vendedor">{sub.vendedor?.name ?? '—'}</Field>
+                  <Field label="Agentes">{sub.agents.length}</Field>
+                  <Field label="Onb">{people(sub.onbSet)}</Field>
+                  <Field label="CS">{people(sub.csSet)}</Field>
+                  <Field label="IE">{people(sub.ieSet)}</Field>
+                </div>
+              </Section>
+
+              <Section title="Agentes">
+                {sub.agents.length === 0 ? (
+                  <p className="text-sm text-slate-500">Sin agentes.</p>
+                ) : (
+                  <ul className="flex flex-col divide-y divide-slate-200">
+                    {sub.agents.map((a) => (
+                      <li
+                        key={a.id}
+                        className="flex items-center justify-between gap-3 py-2 hover:bg-white"
+                      >
+                        <Link
+                          href={`/agents/${a.id}`}
+                          className="truncate text-sm font-medium text-slate-800 hover:text-slate-900 hover:underline"
+                        >
+                          {a.derivedName}
+                        </Link>
+                        <span className="flex shrink-0 items-center gap-2">
+                          {a.isLive && (
+                            <Badge label="Live" className={AGENT_LIVE_BADGE} title={AGENT_LIVE_DESC} />
+                          )}
+                          {!a.isActive && (
+                            <Badge
+                              label="Baja"
+                              className={AGENT_INACTIVE_BADGE}
+                              title={AGENT_INACTIVE_DESC}
+                            />
+                          )}
+                          <AgentStageBadge stage={a.currentStage} />
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </Section>
+            </>
           )}
-        </Section>
         </div>
 
         <div className="lg:sticky lg:top-6">

@@ -26,12 +26,15 @@ export function OrgManager({
   org,
   countries,
   members,
+  managePath: managePathProp,
 }: {
   org: OrgManageData
   countries: PersonRef[]
   members: PersonRef[]
+  managePath?: string
 }) {
-  const managePath = `/clients/${org.id}/edit`
+  // Dónde redirige cada guardado (para quedarse en el lugar correcto).
+  const managePath = managePathProp ?? `/clients/${org.id}/edit`
   const [openClients, setOpenClients] = useState<Set<string>>(new Set())
   const toggleClient = (id: string) =>
     setOpenClients((prev) => {
