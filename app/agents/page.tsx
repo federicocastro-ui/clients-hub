@@ -20,11 +20,19 @@ export default async function AgentsPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
-      <header className="mb-5">
-        <h1 className="text-lg font-semibold text-slate-900">Agentes</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          {agents.length} {agents.length === 1 ? 'agente' : 'agentes'} en todas las organizaciones.
-        </p>
+      <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-lg font-semibold text-slate-900">Agentes</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {agents.length} {agents.length === 1 ? 'agente' : 'agentes'} en todas las organizaciones.
+          </p>
+        </div>
+        <Link
+          href="/agents/new"
+          className="shrink-0 rounded-xl bg-accent px-3 py-1.5 text-sm font-medium text-white transition hover:bg-accent-hover hover:shadow-[0_6px_16px_rgba(37,99,235,0.25)]"
+        >
+          + Nuevo agente
+        </Link>
       </header>
 
       {usingMock && (
